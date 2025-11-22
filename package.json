@@ -54,6 +54,7 @@
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.4",
     "happy-dom": "^20.0.10",
+    "jsdom": "^27.2.0",
     "prettier": "^3.6.2",
     "react-native-web": "^0.21.2",
     "react-test-renderer": "19.1.0",

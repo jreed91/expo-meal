@@ -6,7 +6,7 @@ export default defineConfig({
   plugins: [react()],
   test: {
     globals: true,
-    environment: 'happy-dom',
+    environment: 'jsdom',
     setupFiles: ['./test-setup.ts'],
     include: ['**/__tests__/**/*.{test,spec}.{js,jsx,ts,tsx}'],
     coverage: {
@@ -19,11 +19,22 @@ export default defineConfig({
         '**/types/**',
       ],
     },
+    server: {
+      deps: {
+        inline: [
+          'react-native',
+          'react-native-web',
+          '@expo/vector-icons',
+          'expo-modules-core',
+        ],
+      },
+    },
   },
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './'),
       'react-native': 'react-native-web',
+      'react-native/Libraries/Utilities/Platform': 'react-native-web/dist/exports/Platform',
     },
   },
 });
