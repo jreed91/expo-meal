@@ -1,0 +1,58 @@
+name: iOS Build
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
+
+jobs:
+  build:
+    name: Build iOS App
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Setup Expo
+        uses: expo/expo-github-action@v8
+        with:
+          expo-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Run prebuild for iOS
+        run: npx expo prebuild --platform ios --clean
+
+      - name: Build iOS app
+        run: |
+          cd ios
+          pod install
+          xcodebuild -workspace expo-meal.xcworkspace \
+            -scheme expo-meal \
+            -configuration Release \
+            -sdk iphoneos \
+            -archivePath ./build/expo-meal.xcarchive \
+            archive \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-build
+          path: ios/build/expo-meal.xcarchive
