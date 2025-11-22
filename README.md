@@ -10,7 +10,8 @@ A modern React Native application built with Expo, TypeScript, and Tailwind CSS 
 - 🧪 **Vitest** - Fast unit testing with React Native Testing Library
 - 🗃️ **Zustand** - Lightweight state management
 - 🎯 **ESLint & Prettier** - Code quality and formatting
-- 🚀 **GitHub Actions** - Automated CI/CD pipelines
+- 🚀 **EAS Build** - Cloud-based builds with Expo Application Services
+- 📦 **GitHub Actions** - Automated CI/CD pipelines
 
 ## Getting Started
 
@@ -67,6 +68,87 @@ A modern React Native application built with Expo, TypeScript, and Tailwind CSS 
 - `npm run format` - Format code with Prettier
 - `npm run format:check` - Check code formatting
 
+### EAS Build
+
+- `npm run build:dev` - Build development iOS app
+- `npm run build:preview` - Build preview iOS app for testing
+- `npm run build:prod` - Build production iOS app
+
+## EAS Build Setup
+
+This project uses [Expo Application Services (EAS)](https://expo.dev/eas) for building and deploying the app.
+
+### First-time Setup
+
+1. **Install EAS CLI** (already included as dev dependency):
+   ```bash
+   npm install
+   ```
+
+2. **Login to Expo**:
+   ```bash
+   npx eas login
+   ```
+
+3. **Configure your project**:
+   ```bash
+   npx eas build:configure
+   ```
+
+### Building for iOS
+
+The project includes three build profiles:
+
+#### 1. Development Build
+For development with Expo's development client:
+```bash
+npm run build:dev
+# or
+npx eas build --profile development --platform ios
+```
+
+#### 2. Preview Build (Recommended for Testing)
+Creates an installable build for testing on physical devices without App Store:
+```bash
+npm run build:preview
+# or
+npx eas build --profile preview --platform ios
+```
+
+**To install on your device:**
+1. Run the preview build command
+2. Register your iOS device when prompted (or add it at https://expo.dev)
+3. Once the build completes, scan the QR code with your iOS device
+4. Download and install the app
+
+#### 3. Production Build
+For App Store submission:
+```bash
+npm run build:prod
+# or
+npx eas build --profile production --platform ios
+```
+
+### Viewing Builds
+
+After running a build command:
+- Visit https://expo.dev to see build status
+- Builds appear in your project dashboard
+- Download the `.ipa` file or install directly on registered devices
+
+### GitHub Actions Integration
+
+EAS builds are automatically triggered via GitHub Actions:
+- **Pull Requests**: Triggers preview builds
+- **Main/Develop branches**: Triggers appropriate builds based on branch
+- **Manual**: Use workflow_dispatch to trigger builds manually from GitHub Actions tab
+
+**Required Secret:**
+Add `EXPO_TOKEN` to your GitHub repository secrets:
+1. Generate a token: `npx eas build:configure`
+2. Go to repository Settings → Secrets and variables → Actions
+3. Add new secret named `EXPO_TOKEN` with your token value
+
 ## Project Structure
 
 ```
@@ -81,11 +163,12 @@ expo-meal/
 ├── assets/                # Images, fonts, etc.
 ├── .github/               # GitHub Actions workflows
 │   └── workflows/
-│       ├── ios-build.yml  # iOS build pipeline
+│       ├── ios-build.yml  # EAS build pipeline
 │       ├── test.yml       # Test pipeline
 │       └── lint.yml       # Lint pipeline
 ├── global.css             # Global Tailwind styles
 ├── tailwind.config.js     # Tailwind configuration
+├── eas.json               # EAS Build configuration
 ├── vitest.config.ts       # Vitest configuration
 └── tsconfig.json          # TypeScript configuration
 ```
@@ -149,7 +232,7 @@ describe('MyComponent', () => {
 
 This project includes three GitHub Actions workflows:
 
-1. **iOS Build** - Builds the iOS app on push/PR to main/develop
+1. **EAS Build** - Builds iOS app using EAS on push/PR to main/develop (requires EXPO_TOKEN secret)
 2. **Test** - Runs tests and generates coverage reports
 3. **Lint** - Checks code quality with ESLint and Prettier
 
