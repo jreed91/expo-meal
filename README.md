@@ -24,17 +24,20 @@ A modern React Native application built with Expo, TypeScript, and Tailwind CSS 
 ### Installation
 
 1. Clone the repository:
+
    ```bash
    git clone <repository-url>
    cd expo-meal
    ```
 
 2. Install dependencies:
+
    ```bash
    npm install
    ```
 
 3. Start the development server:
+
    ```bash
    npm start
    ```
@@ -81,11 +84,13 @@ This project uses [Expo Application Services (EAS)](https://expo.dev/eas) for bu
 ### First-time Setup
 
 1. **Install EAS CLI** (already included as dev dependency):
+
    ```bash
    npm install
    ```
 
 2. **Login to Expo**:
+
    ```bash
    npx eas login
    ```
@@ -100,7 +105,9 @@ This project uses [Expo Application Services (EAS)](https://expo.dev/eas) for bu
 The project includes three build profiles:
 
 #### 1. Development Build
+
 For development with Expo's development client:
+
 ```bash
 npm run build:dev
 # or
@@ -108,7 +115,9 @@ npx eas build --profile development --platform ios
 ```
 
 #### 2. Preview Build (Recommended for Testing)
+
 Creates an installable build for testing on physical devices without App Store:
+
 ```bash
 npm run build:preview
 # or
@@ -116,13 +125,16 @@ npx eas build --profile preview --platform ios
 ```
 
 **To install on your device:**
+
 1. Run the preview build command
 2. Register your iOS device when prompted (or add it at https://expo.dev)
 3. Once the build completes, scan the QR code with your iOS device
 4. Download and install the app
 
 #### 3. Production Build
+
 For App Store submission:
+
 ```bash
 npm run build:prod
 # or
@@ -132,6 +144,7 @@ npx eas build --profile production --platform ios
 ### Viewing Builds
 
 After running a build command:
+
 - Visit https://expo.dev to see build status
 - Builds appear in your project dashboard
 - Download the `.ipa` file or install directly on registered devices
@@ -139,12 +152,14 @@ After running a build command:
 ### GitHub Actions Integration
 
 EAS builds are automatically triggered via GitHub Actions:
+
 - **Pull Requests**: Triggers preview builds
 - **Main/Develop branches**: Triggers appropriate builds based on branch
 - **Manual**: Use workflow_dispatch to trigger builds manually from GitHub Actions tab
 
 **Required Secret:**
 Add `EXPO_TOKEN` to your GitHub repository secrets:
+
 1. Generate a token: `npx eas build:configure`
 2. Go to repository Settings → Secrets and variables → Actions
 3. Add new secret named `EXPO_TOKEN` with your token value
@@ -183,9 +198,7 @@ import { View, Text } from 'react-native';
 export default function Example() {
   return (
     <View className="flex-1 items-center justify-center bg-white">
-      <Text className="text-2xl font-bold text-blue-500">
-        Hello NativeWind!
-      </Text>
+      <Text className="text-2xl font-bold text-blue-500">Hello NativeWind!</Text>
     </View>
   );
 }

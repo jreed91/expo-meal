@@ -12,21 +12,11 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
-      exclude: [
-        'node_modules/',
-        'test-setup.ts',
-        '**/*.config.{js,ts}',
-        '**/types/**',
-      ],
+      exclude: ['node_modules/', 'test-setup.ts', '**/*.config.{js,ts}', '**/types/**'],
     },
     server: {
       deps: {
-        inline: [
-          'react-native',
-          'react-native-web',
-          '@expo/vector-icons',
-          'expo-modules-core',
-        ],
+        inline: ['react-native', 'react-native-web', '@expo/vector-icons', 'expo-modules-core'],
       },
     },
   },
