@@ -95,10 +95,19 @@ This project uses [Expo Application Services (EAS)](https://expo.dev/eas) for bu
    npx eas login
    ```
 
-3. **Configure your project**:
+3. **Initialize EAS for your project**:
+
+   ```bash
+   npx eas init
+   ```
+
+   This creates an Expo project and links it to your account. Follow the prompts to either create a new project or link to an existing one.
+
+4. **Configure builds** (if needed):
    ```bash
    npx eas build:configure
    ```
+   The project already has `eas.json` configured, so this step may not be necessary.
 
 ### Building for iOS
 
