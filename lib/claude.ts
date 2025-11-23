@@ -243,7 +243,7 @@ export const sendMessage = async (
 
     // Direct API call using fetch (bypassing SDK for React Native compatibility)
     const requestBody = {
-      model: 'claude-3-5-sonnet-20241022',
+      model: 'claude-haiku-4-5-20251001',
       max_tokens: 1024,
       system: contextPrompt,
       messages: formattedMessages,
