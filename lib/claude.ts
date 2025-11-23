@@ -79,6 +79,34 @@ export const tools = [
     },
   },
   {
+    name: 'add_grocery_item',
+    description:
+      'Add an item to the grocery list. Use this when the user mentions they need to buy something. If no active grocery list exists, one will be created.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        name: {
+          type: 'string',
+          description: 'Name of the grocery item',
+        },
+        quantity: {
+          type: 'number',
+          description: 'Quantity of the item',
+        },
+        unit: {
+          type: 'string',
+          description: 'Unit of measurement (e.g., cups, grams, pieces, lbs)',
+        },
+        category: {
+          type: 'string',
+          description:
+            'Optional category (e.g., dairy, meat, vegetables, grains)',
+        },
+      },
+      required: ['name', 'quantity', 'unit'],
+    },
+  },
+  {
     name: 'update_allergies',
     description:
       'Update the user\'s allergy information. Use this when the user mentions new allergies or wants to modify their allergy list.',
@@ -108,7 +136,8 @@ export const buildContextPrompt = (
   profile: any,
   recipes: any[],
   pantryItems: any[],
-  upcomingMeals: any[]
+  upcomingMeals: any[],
+  groceryItems: any[]
 ): string => {
   const allergies = profile?.allergies || [];
   const favoriteRecipes = recipes.filter((r) => r.is_favorite);
@@ -129,7 +158,7 @@ export const buildContextPrompt = (
 
   if (pantryItems.length > 0) {
     context += `Items currently in pantry:\n`;
-    pantryItems.slice(0, 10).forEach((item) => {
+    pantryItems.slice(0, 15).forEach((item) => {
       context += `- ${item.name} (${item.quantity} ${item.unit})\n`;
     });
     context += `\n`;
@@ -137,10 +166,23 @@ export const buildContextPrompt = (
 
   if (upcomingMeals.length > 0) {
     context += `Upcoming meals planned:\n`;
-    upcomingMeals.slice(0, 7).forEach((meal) => {
-      context += `- ${meal.meal_type}: ${meal.meal_name || 'Unnamed meal'}\n`;
+    upcomingMeals.slice(0, 10).forEach((meal) => {
+      const dateObj = new Date(meal.date);
+      const dateStr = dateObj.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+      context += `- ${dateStr} ${meal.meal_type}: ${meal.meal_name || 'Unnamed meal'}\n`;
     });
     context += `\n`;
+  }
+
+  if (groceryItems.length > 0) {
+    const unchecked = groceryItems.filter((item) => !item.is_checked);
+    if (unchecked.length > 0) {
+      context += `Items on grocery list (need to buy):\n`;
+      unchecked.slice(0, 15).forEach((item) => {
+        context += `- ${item.name} (${item.quantity} ${item.unit})\n`;
+      });
+      context += `\n`;
+    }
   }
 
   context += `You can help with:\n`;
@@ -148,14 +190,19 @@ export const buildContextPrompt = (
   context += `- Recipe recommendations\n`;
   context += `- Cooking tips and substitutions\n`;
   context += `- Nutritional information\n`;
-  context += `- Meal planning advice\n\n`;
+  context += `- Meal planning and grocery shopping advice\n\n`;
 
   context += `IMPORTANT: You have access to tools that allow you to:\n`;
   context += `- Add meals to the user's meal plan\n`;
-  context += `- Add items to the user's pantry\n`;
+  context += `- Add items to the user's pantry (when they buy/have ingredients)\n`;
+  context += `- Add items to the user's grocery list (when they need to buy something)\n`;
   context += `- Update the user's allergy information\n\n`;
 
-  context += `When the user asks you to add a meal, add pantry items, or update their allergies, use the appropriate tool. Be proactive - if the user says "I bought eggs" or "let's have pasta for dinner tomorrow", use the tools to help them.\n\n`;
+  context += `Be smart about context:\n`;
+  context += `- When suggesting recipes, check if ingredients are in the pantry or grocery list\n`;
+  context += `- If ingredients are missing, offer to add them to the grocery list\n`;
+  context += `- Consider upcoming meals when making suggestions\n`;
+  context += `- When user says "I bought X", add to pantry. When they say "I need X", add to grocery list\n\n`;
 
   context += `Be friendly, concise, and helpful. Always remember the user's allergies.`;
 

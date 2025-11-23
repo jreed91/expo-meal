@@ -16,6 +16,7 @@ import { useAuthStore } from '@/store/authStore';
 import { useRecipeStore } from '@/store/recipeStore';
 import { useMealPlanStore } from '@/store/mealPlanStore';
 import { usePantryStore } from '@/store/pantryStore';
+import { useGroceryStore } from '@/store/groceryStore';
 import { Message, buildContextPrompt, sendMessage, ToolCall } from '@/lib/claude';
 import { supabase } from '@/lib/supabase';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
@@ -25,13 +26,21 @@ export default function ChatScreen() {
   const { recipes } = useRecipeStore();
   const { mealPlans, addMealPlan, fetchMealPlans } = useMealPlanStore();
   const { pantryItems, addPantryItem, fetchPantryItems } = usePantryStore();
+  const {
+    groceryLists,
+    groceryListItems,
+    createGroceryList,
+    addItemToList,
+    fetchGroceryLists,
+    fetchGroceryListItems,
+  } = useGroceryStore();
 
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
       role: 'assistant',
       content:
-        "Hi! I'm Claude, your cooking and meal planning assistant. I can help you with recipe suggestions, cooking tips, meal planning, and more. I can also help you add meals to your plan, add pantry items, and update your allergy information. What would you like to do?",
+        "Hi! I'm Claude, your cooking and meal planning assistant. I can help you with recipe suggestions, cooking tips, meal planning, and more. I can also help you add meals to your plan, manage your pantry and grocery list, and update your allergy information. What would you like to do?",
       timestamp: new Date(),
     },
   ]);
@@ -39,11 +48,32 @@ export default function ChatScreen() {
   const [loading, setLoading] = useState(false);
   const scrollViewRef = useRef<ScrollView>(null);
 
+  // Load grocery lists on mount and their items
+  useEffect(() => {
+    const loadGroceryData = async () => {
+      await fetchGroceryLists();
+    };
+    loadGroceryData();
+  }, []);
+
+  // Load items when grocery lists change
+  useEffect(() => {
+    groceryLists.forEach((list) => {
+      if (!groceryListItems[list.id]) {
+        fetchGroceryListItems(list.id);
+      }
+    });
+  }, [groceryLists]);
+
+  // Get all grocery items from active lists
+  const allGroceryItems = Object.values(groceryListItems).flat();
+
   const contextPrompt = buildContextPrompt(
     profile,
     recipes,
     pantryItems,
-    mealPlans
+    mealPlans,
+    allGroceryItems
   );
 
   useEffect(() => {
@@ -83,6 +113,36 @@ export default function ChatScreen() {
           // Refresh pantry items
           await fetchPantryItems();
           return `Successfully added ${quantity} ${unit} of ${name} to pantry`;
+        }
+
+        case 'add_grocery_item': {
+          const { name, quantity, unit, category } = toolCall.input;
+
+          // Get or create an active grocery list
+          let activeList = groceryLists[0]; // Use the most recent list
+          if (!activeList) {
+            // Create a new list if none exists
+            const today = new Date().toLocaleDateString('en-US', {
+              month: 'short',
+              day: 'numeric',
+            });
+            activeList = await createGroceryList(`Grocery List - ${today}`);
+          }
+
+          // Add item to the list
+          await addItemToList(activeList.id, {
+            name,
+            quantity,
+            unit,
+            category: category || null,
+            is_checked: false,
+            recipe_id: null,
+          });
+
+          // Refresh grocery list items
+          await fetchGroceryListItems(activeList.id);
+
+          return `Successfully added ${quantity} ${unit} of ${name} to grocery list`;
         }
 
         case 'update_allergies': {
@@ -190,8 +250,8 @@ export default function ChatScreen() {
   const suggestedPrompts = [
     "What can I make with what's in my pantry?",
     'Add spaghetti to dinner tomorrow',
-    'I just bought 2 lbs of chicken',
-    "I'm allergic to peanuts",
+    'I need to buy milk and eggs',
+    'Suggest meals for this week',
   ];
 
   const handleSuggestedPrompt = (prompt: string) => {
