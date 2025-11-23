@@ -259,25 +259,30 @@ export default function ChatScreen() {
   };
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      className="flex-1 bg-white dark:bg-gray-900"
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
-    >
-      <View className="p-4 border-b border-gray-200 dark:border-gray-800">
-        <Text className="text-2xl font-bold text-gray-900 dark:text-white">
-          Chat with Claude
-        </Text>
-      </View>
-
-      <ScrollView
-        ref={scrollViewRef}
-        className="flex-1 p-4"
-        keyboardShouldPersistTaps="handled"
-        onContentSizeChange={() =>
-          scrollViewRef.current?.scrollToEnd({ animated: true })
-        }
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        className="flex-1 bg-white dark:bg-gray-900"
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
       >
+        <View className="p-4 border-b border-gray-200 dark:border-gray-800">
+          <Text className="text-2xl font-bold text-gray-900 dark:text-white">
+            Chat with Claude
+          </Text>
+          <Text className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+            Tap anywhere to dismiss keyboard
+          </Text>
+        </View>
+
+        <ScrollView
+          ref={scrollViewRef}
+          className="flex-1 p-4"
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
+          onContentSizeChange={() =>
+            scrollViewRef.current?.scrollToEnd({ animated: true })
+          }
+        >
         {messages.map((message) => (
           <View
             key={message.id}
@@ -381,6 +386,7 @@ export default function ChatScreen() {
           </TouchableOpacity>
         </View>
       </View>
-    </KeyboardAvoidingView>
+      </KeyboardAvoidingView>
+    </TouchableWithoutFeedback>
   );
 }
