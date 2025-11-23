@@ -78,6 +78,16 @@ CREATE TABLE grocery_list_items (
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- Create conversations table for chat history
+CREATE TABLE conversations (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  user_id UUID REFERENCES profiles(id) ON DELETE CASCADE NOT NULL,
+  title TEXT NOT NULL,
+  messages JSONB NOT NULL DEFAULT '[]',
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
 -- Create indexes for better query performance
 CREATE INDEX idx_recipes_user_id ON recipes(user_id);
 CREATE INDEX idx_recipes_is_favorite ON recipes(is_favorite);
@@ -86,6 +96,8 @@ CREATE INDEX idx_meal_plans_date ON meal_plans(date);
 CREATE INDEX idx_pantry_items_user_id ON pantry_items(user_id);
 CREATE INDEX idx_grocery_lists_user_id ON grocery_lists(user_id);
 CREATE INDEX idx_grocery_list_items_grocery_list_id ON grocery_list_items(grocery_list_id);
+CREATE INDEX idx_conversations_user_id ON conversations(user_id);
+CREATE INDEX idx_conversations_updated_at ON conversations(updated_at DESC);
 
 -- Set up Row Level Security (RLS)
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
@@ -94,6 +106,7 @@ ALTER TABLE meal_plans ENABLE ROW LEVEL SECURITY;
 ALTER TABLE pantry_items ENABLE ROW LEVEL SECURITY;
 ALTER TABLE grocery_lists ENABLE ROW LEVEL SECURITY;
 ALTER TABLE grocery_list_items ENABLE ROW LEVEL SECURITY;
+ALTER TABLE conversations ENABLE ROW LEVEL SECURITY;
 
 -- Profiles policies
 CREATE POLICY "Users can view own profile" ON profiles
@@ -194,6 +207,19 @@ CREATE POLICY "Users can delete grocery list items" ON grocery_list_items
     )
   );
 
+-- Conversations policies
+CREATE POLICY "Users can view own conversations" ON conversations
+  FOR SELECT USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can insert own conversations" ON conversations
+  FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update own conversations" ON conversations
+  FOR UPDATE USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can delete own conversations" ON conversations
+  FOR DELETE USING (auth.uid() = user_id);
+
 -- Create function to automatically create profile on signup
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
@@ -241,4 +267,8 @@ CREATE TRIGGER set_updated_at_grocery_lists
 
 CREATE TRIGGER set_updated_at_grocery_list_items
   BEFORE UPDATE ON grocery_list_items
+  FOR EACH ROW EXECUTE FUNCTION public.handle_updated_at();
+
+CREATE TRIGGER set_updated_at_conversations
+  BEFORE UPDATE ON conversations
   FOR EACH ROW EXECUTE FUNCTION public.handle_updated_at();
