@@ -16,7 +16,103 @@ export interface Message {
   role: 'user' | 'assistant';
   content: string;
   timestamp: Date;
+  toolCalls?: ToolCall[];
 }
+
+export interface ToolCall {
+  id: string;
+  name: string;
+  input: any;
+  result?: string;
+}
+
+// Tool definitions for Claude
+export const tools = [
+  {
+    name: 'add_meal_plan',
+    description:
+      'Add a meal to the meal plan for a specific date and meal type. Use this when the user wants to plan a meal for a specific day.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        date: {
+          type: 'string',
+          description: 'Date in YYYY-MM-DD format (e.g., 2025-11-23)',
+        },
+        meal_type: {
+          type: 'string',
+          enum: ['breakfast', 'lunch', 'dinner', 'snack'],
+          description: 'Type of meal',
+        },
+        meal_name: {
+          type: 'string',
+          description: 'Name of the meal or dish',
+        },
+        recipe_id: {
+          type: 'string',
+          description: 'Optional recipe ID if linking to an existing recipe',
+        },
+      },
+      required: ['date', 'meal_type', 'meal_name'],
+    },
+  },
+  {
+    name: 'add_pantry_item',
+    description:
+      'Add an item to the pantry inventory. Use this when the user mentions they have or bought ingredients.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        name: {
+          type: 'string',
+          description: 'Name of the pantry item',
+        },
+        quantity: {
+          type: 'number',
+          description: 'Quantity of the item',
+        },
+        unit: {
+          type: 'string',
+          description: 'Unit of measurement (e.g., cups, grams, pieces, lbs)',
+        },
+        category: {
+          type: 'string',
+          description:
+            'Optional category (e.g., dairy, meat, vegetables, grains)',
+        },
+        expiry_date: {
+          type: 'string',
+          description: 'Optional expiry date in YYYY-MM-DD format',
+        },
+      },
+      required: ['name', 'quantity', 'unit'],
+    },
+  },
+  {
+    name: 'update_allergies',
+    description:
+      'Update the user\'s allergy information. Use this when the user mentions new allergies or wants to modify their allergy list.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        allergies: {
+          type: 'array',
+          items: {
+            type: 'string',
+          },
+          description: 'Array of allergy names',
+        },
+        action: {
+          type: 'string',
+          enum: ['replace', 'add', 'remove'],
+          description:
+            'Whether to replace all allergies, add new ones, or remove specific ones',
+        },
+      },
+      required: ['allergies', 'action'],
+    },
+  },
+];
 
 export const buildContextPrompt = (
   profile: any,
@@ -27,7 +123,7 @@ export const buildContextPrompt = (
   const allergies = profile?.allergies || [];
   const favoriteRecipes = recipes.filter((r) => r.is_favorite);
 
-  let context = `You are a helpful cooking and meal planning assistant. Here's the context about the user:\n\n`;
+  let context = `You are a helpful cooking and meal planning assistant with the ability to take actions. Here's the context about the user:\n\n`;
 
   if (allergies.length > 0) {
     context += `IMPORTANT: The user has the following allergies: ${allergies.join(', ')}. Always consider these when suggesting recipes or ingredients.\n\n`;
@@ -64,15 +160,27 @@ export const buildContextPrompt = (
   context += `- Nutritional information\n`;
   context += `- Meal planning advice\n\n`;
 
+  context += `IMPORTANT: You have access to tools that allow you to:\n`;
+  context += `- Add meals to the user's meal plan\n`;
+  context += `- Add items to the user's pantry\n`;
+  context += `- Update the user's allergy information\n\n`;
+
+  context += `When the user asks you to add a meal, add pantry items, or update their allergies, use the appropriate tool. Be proactive - if the user says "I bought eggs" or "let's have pasta for dinner tomorrow", use the tools to help them.\n\n`;
+
   context += `Be friendly, concise, and helpful. Always remember the user's allergies.`;
 
   return context;
 };
 
+export interface SendMessageResponse {
+  text: string;
+  toolCalls?: ToolCall[];
+}
+
 export const sendMessage = async (
   messages: Message[],
   contextPrompt: string
-): Promise<string> => {
+): Promise<SendMessageResponse> => {
   try {
     const formattedMessages = messages.map((msg) => ({
       role: msg.role,
@@ -84,14 +192,29 @@ export const sendMessage = async (
       max_tokens: 1024,
       system: contextPrompt,
       messages: formattedMessages,
+      tools: tools,
     });
 
-    const content = response.content[0];
-    if (content.type === 'text') {
-      return content.text;
+    let textContent = '';
+    const toolCalls: ToolCall[] = [];
+
+    // Process response content
+    for (const content of response.content) {
+      if (content.type === 'text') {
+        textContent += content.text;
+      } else if (content.type === 'tool_use') {
+        toolCalls.push({
+          id: content.id,
+          name: content.name,
+          input: content.input,
+        });
+      }
     }
 
-    throw new Error('Unexpected response format');
+    return {
+      text: textContent,
+      toolCalls: toolCalls.length > 0 ? toolCalls : undefined,
+    };
   } catch (error) {
     console.error('Error sending message to Claude:', error);
     throw error;

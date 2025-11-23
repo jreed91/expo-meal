@@ -14,21 +14,22 @@ import { useAuthStore } from '@/store/authStore';
 import { useRecipeStore } from '@/store/recipeStore';
 import { useMealPlanStore } from '@/store/mealPlanStore';
 import { usePantryStore } from '@/store/pantryStore';
-import { Message, buildContextPrompt, sendMessage } from '@/lib/claude';
+import { Message, buildContextPrompt, sendMessage, ToolCall } from '@/lib/claude';
+import { supabase } from '@/lib/supabase';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 
 export default function ChatScreen() {
-  const { profile } = useAuthStore();
+  const { profile, user, fetchProfile } = useAuthStore();
   const { recipes } = useRecipeStore();
-  const { mealPlans } = useMealPlanStore();
-  const { pantryItems } = usePantryStore();
+  const { mealPlans, addMealPlan, fetchMealPlans } = useMealPlanStore();
+  const { pantryItems, addPantryItem, fetchPantryItems } = usePantryStore();
 
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
       role: 'assistant',
       content:
-        "Hi! I'm Claude, your cooking and meal planning assistant. I can help you with recipe suggestions, cooking tips, meal planning, and more. What would you like to know?",
+        "Hi! I'm Claude, your cooking and meal planning assistant. I can help you with recipe suggestions, cooking tips, meal planning, and more. I can also help you add meals to your plan, add pantry items, and update your allergy information. What would you like to do?",
       timestamp: new Date(),
     },
   ]);
@@ -46,6 +47,79 @@ export default function ChatScreen() {
   useEffect(() => {
     scrollViewRef.current?.scrollToEnd({ animated: true });
   }, [messages]);
+
+  // Execute tool calls
+  const executeTool = async (toolCall: ToolCall): Promise<string> => {
+    try {
+      switch (toolCall.name) {
+        case 'add_meal_plan': {
+          const { date, meal_type, meal_name, recipe_id } = toolCall.input;
+          await addMealPlan({
+            date,
+            meal_type,
+            meal_name,
+            recipe_id: recipe_id || null,
+          });
+          // Refresh meal plans
+          const startDate = new Date();
+          startDate.setDate(startDate.getDate() - 7);
+          const endDate = new Date();
+          endDate.setDate(endDate.getDate() + 14);
+          await fetchMealPlans(startDate, endDate);
+          return `Successfully added ${meal_name} to ${meal_type} on ${date}`;
+        }
+
+        case 'add_pantry_item': {
+          const { name, quantity, unit, category, expiry_date } = toolCall.input;
+          await addPantryItem({
+            name,
+            quantity,
+            unit,
+            category: category || null,
+            expiry_date: expiry_date || null,
+          });
+          // Refresh pantry items
+          await fetchPantryItems();
+          return `Successfully added ${quantity} ${unit} of ${name} to pantry`;
+        }
+
+        case 'update_allergies': {
+          if (!user) throw new Error('Not authenticated');
+          const { allergies, action } = toolCall.input;
+
+          let updatedAllergies = [...(profile?.allergies || [])];
+
+          if (action === 'replace') {
+            updatedAllergies = allergies;
+          } else if (action === 'add') {
+            updatedAllergies = [...updatedAllergies, ...allergies].filter(
+              (v, i, a) => a.indexOf(v) === i
+            ); // Remove duplicates
+          } else if (action === 'remove') {
+            updatedAllergies = updatedAllergies.filter(
+              (a) => !allergies.includes(a)
+            );
+          }
+
+          const { error } = await supabase
+            .from('profiles')
+            .update({ allergies: updatedAllergies })
+            .eq('id', user.id);
+
+          if (error) throw error;
+
+          await fetchProfile();
+          return `Successfully updated allergies. Current allergies: ${updatedAllergies.join(', ') || 'None'}`;
+        }
+
+        default:
+          return `Unknown tool: ${toolCall.name}`;
+      }
+    } catch (error: any) {
+      console.error('Error executing tool:', error);
+      return `Error executing ${toolCall.name}: ${error.message}`;
+    }
+  };
 
   const handleSend = async () => {
     if (!inputText.trim() || loading) return;
@@ -65,11 +139,37 @@ export default function ChatScreen() {
       const conversationHistory = [...messages, userMessage];
       const response = await sendMessage(conversationHistory, contextPrompt);
 
+      // Execute any tool calls
+      let finalContent = response.text;
+      const executedTools: ToolCall[] = [];
+
+      if (response.toolCalls && response.toolCalls.length > 0) {
+        const toolResults: string[] = [];
+
+        for (const toolCall of response.toolCalls) {
+          const result = await executeTool(toolCall);
+          toolResults.push(result);
+          executedTools.push({
+            ...toolCall,
+            result,
+          });
+        }
+
+        // Append tool execution results to the message
+        if (toolResults.length > 0) {
+          finalContent =
+            (finalContent ? finalContent + '\n\n' : '') +
+            '✅ Actions completed:\n' +
+            toolResults.map((r) => `• ${r}`).join('\n');
+        }
+      }
+
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: response,
+        content: finalContent || 'Done!',
         timestamp: new Date(),
+        toolCalls: executedTools.length > 0 ? executedTools : undefined,
       };
 
       setMessages((prev) => [...prev, assistantMessage]);
@@ -86,9 +186,9 @@ export default function ChatScreen() {
 
   const suggestedPrompts = [
     "What can I make with what's in my pantry?",
-    'Suggest a healthy dinner for tonight',
-    'Help me plan meals for this week',
-    'Give me a quick breakfast idea',
+    'Add spaghetti to dinner tomorrow',
+    'I just bought 2 lbs of chicken',
+    "I'm allergic to peanuts",
   ];
 
   const handleSuggestedPrompt = (prompt: string) => {
@@ -122,9 +222,23 @@ export default function ChatScreen() {
               className={`max-w-[80%] p-3 rounded-lg ${
                 message.role === 'user'
                   ? 'bg-blue-600'
-                  : 'bg-gray-100 dark:bg-gray-800'
+                  : message.toolCalls && message.toolCalls.length > 0
+                    ? 'bg-green-50 dark:bg-green-900 border-2 border-green-500'
+                    : 'bg-gray-100 dark:bg-gray-800'
               }`}
             >
+              {message.toolCalls && message.toolCalls.length > 0 && (
+                <View className="flex-row items-center mb-2">
+                  <FontAwesome
+                    name="check-circle"
+                    size={16}
+                    color="#22c55e"
+                  />
+                  <Text className="text-green-600 dark:text-green-400 font-semibold ml-2">
+                    Action Performed
+                  </Text>
+                </View>
+              )}
               <Text
                 className={`${
                   message.role === 'user'
