@@ -28,34 +28,6 @@ export default function TabLayout() {
       }}
     >
       <Tabs.Screen
-        name="index"
-        options={{
-          title: 'Meals',
-          tabBarIcon: ({ color }) => <TabBarIcon name="calendar" color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="recipes"
-        options={{
-          title: 'Recipes',
-          tabBarIcon: ({ color }) => <TabBarIcon name="book" color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="grocery"
-        options={{
-          title: 'Grocery',
-          tabBarIcon: ({ color }) => <TabBarIcon name="shopping-cart" color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="pantry"
-        options={{
-          title: 'Pantry',
-          tabBarIcon: ({ color }) => <TabBarIcon name="archive" color={color} />,
-        }}
-      />
-      <Tabs.Screen
         name="chat"
         options={{
           title: 'Chat',
@@ -63,10 +35,42 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="food"
+        options={{
+          title: 'Food',
+          tabBarIcon: ({ color }) => <TabBarIcon name="cutlery" color={color} />,
+        }}
+      />
+      <Tabs.Screen
         name="profile"
         options={{
           title: 'Profile',
           tabBarIcon: ({ color }) => <TabBarIcon name="user" color={color} />,
+        }}
+      />
+      {/* Hidden screens - accessible through food.tsx menu */}
+      <Tabs.Screen
+        name="index"
+        options={{
+          href: null, // Hide from tab bar
+        }}
+      />
+      <Tabs.Screen
+        name="recipes"
+        options={{
+          href: null, // Hide from tab bar
+        }}
+      />
+      <Tabs.Screen
+        name="grocery"
+        options={{
+          href: null, // Hide from tab bar
+        }}
+      />
+      <Tabs.Screen
+        name="pantry"
+        options={{
+          href: null, // Hide from tab bar
         }}
       />
     </Tabs>
