@@ -1,53 +1,5 @@
-import Anthropic from '@anthropic-ai/sdk';
-
 const apiKey = process.env.EXPO_PUBLIC_ANTHROPIC_API_KEY || '';
-
-// Custom fetch for React Native compatibility
-const customFetch: typeof fetch = async (url, init) => {
-  console.log('📡 Fetching:', url);
-  console.log('📋 Original headers:', init?.headers);
-
-  // Ensure headers are properly formatted for React Native
-  const headers = new Headers(init?.headers);
-
-  // The SDK should add x-api-key, but let's ensure it's there
-  if (apiKey && !headers.has('x-api-key')) {
-    headers.set('x-api-key', apiKey);
-  }
-
-  // Add anthropic-version if not present
-  if (!headers.has('anthropic-version')) {
-    headers.set('anthropic-version', '2023-06-01');
-  }
-
-  console.log('📋 Final headers:', Object.fromEntries(headers.entries()));
-
-  const response = await fetch(url, {
-    ...init,
-    headers: headers,
-  });
-
-  console.log('📥 Response status:', response.status, response.statusText);
-
-  if (!response.ok) {
-    // Clone the response so we can read it without consuming it
-    const clonedResponse = response.clone();
-    try {
-      const errorText = await clonedResponse.text();
-      console.log('❌ Error response:', errorText);
-    } catch (e) {
-      console.log('❌ Could not read error response');
-    }
-  }
-
-  return response;
-};
-
-export const anthropic = new Anthropic({
-  apiKey,
-  dangerouslyAllowBrowser: true, // Note: In production, use a backend proxy
-  fetch: customFetch,
-});
+const ANTHROPIC_API_URL = 'https://api.anthropic.com/v1/messages';
 
 export interface Message {
   id: string;
@@ -239,22 +191,59 @@ export const sendMessage = async (
       content: msg.content,
     }));
 
-    console.log('Sending message to Claude with model: claude-3-5-sonnet-20241022');
+    console.log('Sending message to Claude API');
     console.log('Messages count:', formattedMessages.length);
 
-    const response = await anthropic.messages.create({
+    // Direct API call using fetch (bypassing SDK for React Native compatibility)
+    const requestBody = {
       model: 'claude-3-5-sonnet-20241022',
       max_tokens: 1024,
       system: contextPrompt,
       messages: formattedMessages,
       tools: tools,
+    };
+
+    console.log('📡 Calling:', ANTHROPIC_API_URL);
+
+    const response = await fetch(ANTHROPIC_API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+      },
+      body: JSON.stringify(requestBody),
     });
+
+    console.log('📥 Response status:', response.status, response.statusText);
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.log('❌ Error response:', errorData);
+
+      if (response.status === 401) {
+        throw new Error(
+          'Invalid API key. Please check your EXPO_PUBLIC_ANTHROPIC_API_KEY in .env file.'
+        );
+      } else if (response.status === 400) {
+        throw new Error(
+          `Bad request: ${errorData.error?.message || 'Invalid request format'}`
+        );
+      } else {
+        throw new Error(
+          `API error (${response.status}): ${errorData.error?.message || response.statusText}`
+        );
+      }
+    }
+
+    const data = await response.json();
+    console.log('✅ Response received, processing content');
 
     let textContent = '';
     const toolCalls: ToolCall[] = [];
 
     // Process response content
-    for (const content of response.content) {
+    for (const content of data.content) {
       if (content.type === 'text') {
         textContent += content.text;
       } else if (content.type === 'tool_use') {
@@ -272,23 +261,9 @@ export const sendMessage = async (
     };
   } catch (error: any) {
     console.error('Error sending message to Claude:', error);
-    console.error('Error details:', {
-      message: error.message,
-      status: error.status,
-      type: error.type,
-      error: error.error,
-    });
 
-    // Provide more helpful error messages
-    if (error.status === 404) {
-      throw new Error(
-        'API endpoint not found (404). This may be due to React Native compatibility issues with the Anthropic SDK. Consider using a backend proxy instead of dangerouslyAllowBrowser.'
-      );
-    } else if (error.status === 401) {
-      throw new Error(
-        'Invalid API key. Please check your EXPO_PUBLIC_ANTHROPIC_API_KEY in .env file.'
-      );
-    } else if (error.message?.includes('network') || error.message?.includes('fetch')) {
+    // Network error
+    if (error.message?.includes('network') || error.message?.includes('fetch')) {
       throw new Error(
         'Network error. Please check your internet connection and ensure the Anthropic API is accessible.'
       );
