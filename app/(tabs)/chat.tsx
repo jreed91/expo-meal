@@ -131,6 +131,10 @@ export default function ChatScreen() {
         case 'add_grocery_item': {
           const { name, quantity, unit, category } = toolCall.input;
 
+          // Default values if not provided
+          const finalQuantity = quantity || 1;
+          const finalUnit = unit || 'item';
+
           // Get or create an active grocery list
           let activeList = groceryLists[0]; // Use the most recent list
           if (!activeList) {
@@ -145,8 +149,8 @@ export default function ChatScreen() {
           // Add item to the list
           await addItemToList(activeList.id, {
             name,
-            quantity,
-            unit,
+            quantity: finalQuantity,
+            unit: finalUnit,
             category: category || null,
             is_checked: false,
             recipe_id: null,
@@ -155,7 +159,7 @@ export default function ChatScreen() {
           // Refresh grocery list items
           await fetchGroceryListItems(activeList.id);
 
-          return `Successfully added ${quantity} ${unit} of ${name} to grocery list`;
+          return `Successfully added ${finalQuantity} ${finalUnit}${finalQuantity !== 1 ? 's' : ''} of ${name} to grocery list`;
         }
 
         case 'update_allergies': {

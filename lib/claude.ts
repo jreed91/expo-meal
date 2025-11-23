@@ -81,7 +81,7 @@ export const tools = [
   {
     name: 'add_grocery_item',
     description:
-      'Add an item to the grocery list. Use this when the user mentions they need to buy something. If no active grocery list exists, one will be created.',
+      'Add an item to the grocery list. Use this when the user mentions they need to buy something. If no active grocery list exists, one will be created. Always try to infer reasonable quantities and units from context.',
     input_schema: {
       type: 'object',
       properties: {
@@ -91,19 +91,20 @@ export const tools = [
         },
         quantity: {
           type: 'number',
-          description: 'Quantity of the item',
+          description: 'Quantity of the item (defaults to 1 if not specified)',
         },
         unit: {
           type: 'string',
-          description: 'Unit of measurement (e.g., cups, grams, pieces, lbs)',
+          description:
+            'Unit of measurement (e.g., lbs, oz, cups, grams, pieces, bottles, cans). Use "item" or "items" if unit is unclear. Defaults to "item" if not specified.',
         },
         category: {
           type: 'string',
           description:
-            'Optional category (e.g., dairy, meat, vegetables, grains)',
+            'Optional category (e.g., dairy, meat, vegetables, grains, bakery)',
         },
       },
-      required: ['name', 'quantity', 'unit'],
+      required: ['name'],
     },
   },
   {
