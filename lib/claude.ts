@@ -4,14 +4,31 @@ const apiKey = process.env.EXPO_PUBLIC_ANTHROPIC_API_KEY || '';
 
 // Custom fetch for React Native compatibility
 const customFetch: typeof fetch = async (url, init) => {
-  console.log('Fetching:', url);
-  return fetch(url, {
+  console.log('📡 Fetching:', url);
+  console.log('📋 Request headers:', init?.headers);
+
+  const response = await fetch(url, {
     ...init,
     headers: {
       ...init?.headers,
       'anthropic-version': '2023-06-01',
     },
   });
+
+  console.log('📥 Response status:', response.status, response.statusText);
+
+  if (!response.ok) {
+    // Clone the response so we can read it without consuming it
+    const clonedResponse = response.clone();
+    try {
+      const errorText = await clonedResponse.text();
+      console.log('❌ Error response:', errorText);
+    } catch (e) {
+      console.log('❌ Could not read error response');
+    }
+  }
+
+  return response;
 };
 
 export const anthropic = new Anthropic({
@@ -192,6 +209,13 @@ export const sendMessage = async (
 ): Promise<SendMessageResponse> => {
   try {
     // Validate API key
+    console.log('API Key check:', {
+      exists: !!apiKey,
+      length: apiKey?.length,
+      prefix: apiKey?.substring(0, 7),
+      isPlaceholder: apiKey === 'your-anthropic-api-key-here',
+    });
+
     if (!apiKey || apiKey === 'your-anthropic-api-key-here') {
       throw new Error(
         'Anthropic API key not configured. Please set EXPO_PUBLIC_ANTHROPIC_API_KEY in your .env file.'
@@ -204,6 +228,7 @@ export const sendMessage = async (
     }));
 
     console.log('Sending message to Claude with model: claude-3-5-sonnet-20241022');
+    console.log('Messages count:', formattedMessages.length);
 
     const response = await anthropic.messages.create({
       model: 'claude-3-5-sonnet-20241022',
