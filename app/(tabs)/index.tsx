@@ -1,31 +1,297 @@
-import { StyleSheet } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import {
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  RefreshControl,
+  Modal,
+  Alert,
+} from 'react-native';
+import { useMealPlanStore } from '@/store/mealPlanStore';
+import { useRecipeStore } from '@/store/recipeStore';
+import FontAwesome from '@expo/vector-icons/FontAwesome';
+import { Database } from '@/types/database.types';
 
-import EditScreenInfo from '@/components/EditScreenInfo';
-import { Text, View } from '@/components/Themed';
+type MealType = 'breakfast' | 'lunch' | 'dinner' | 'snack';
 
-export default function TabOneScreen() {
+const MEAL_TYPES: MealType[] = ['breakfast', 'lunch', 'dinner', 'snack'];
+const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+export default function MealPlannerScreen() {
+  const {
+    fetchMealPlans,
+    selectedWeekStart,
+    setSelectedWeekStart,
+    getWeekDates,
+    getMealsForDate,
+    addMealPlan,
+    deleteMealPlan,
+    loading,
+  } = useMealPlanStore();
+
+  const { recipes, fetchRecipes } = useRecipeStore();
+
+  const [refreshing, setRefreshing] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [selectedMealType, setSelectedMealType] = useState<MealType>('dinner');
+
+  useEffect(() => {
+    loadData();
+  }, [selectedWeekStart]);
+
+  const loadData = async () => {
+    const weekDates = getWeekDates();
+    const startDate = weekDates[0];
+    const endDate = weekDates[6];
+    await Promise.all([fetchMealPlans(startDate, endDate), fetchRecipes()]);
+  };
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await loadData();
+    setRefreshing(false);
+  };
+
+  const goToPreviousWeek = () => {
+    const newDate = new Date(selectedWeekStart);
+    newDate.setDate(newDate.getDate() - 7);
+    setSelectedWeekStart(newDate);
+  };
+
+  const goToNextWeek = () => {
+    const newDate = new Date(selectedWeekStart);
+    newDate.setDate(newDate.getDate() + 7);
+    setSelectedWeekStart(newDate);
+  };
+
+  const goToToday = () => {
+    setSelectedWeekStart(new Date());
+  };
+
+  const formatDateHeader = (date: Date) => {
+    return `${DAYS[date.getDay()]} ${date.getDate()}`;
+  };
+
+  const isToday = (date: Date) => {
+    const today = new Date();
+    return (
+      date.getDate() === today.getDate() &&
+      date.getMonth() === today.getMonth() &&
+      date.getFullYear() === today.getFullYear()
+    );
+  };
+
+  const handleAddMeal = (date: Date, mealType: MealType) => {
+    setSelectedDate(date);
+    setSelectedMealType(mealType);
+    setModalVisible(true);
+  };
+
+  const handleSelectRecipe = async (recipeId: string) => {
+    if (!selectedDate) return;
+
+    try {
+      await addMealPlan({
+        recipe_id: recipeId,
+        meal_type: selectedMealType,
+        date: selectedDate.toISOString().split('T')[0],
+      });
+      setModalVisible(false);
+    } catch (error: any) {
+      Alert.alert('Error', error.message || 'Failed to add meal');
+    }
+  };
+
+  const handleDeleteMeal = (mealId: string) => {
+    Alert.alert('Delete Meal', 'Remove this meal from your plan?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            await deleteMealPlan(mealId);
+          } catch (error: any) {
+            Alert.alert('Error', error.message || 'Failed to delete meal');
+          }
+        },
+      },
+    ]);
+  };
+
+  const weekDates = getWeekDates();
+  const favoriteRecipes = recipes.filter((r) => r.is_favorite);
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Tab One</Text>
-      <View style={styles.separator} lightColor="#eee" darkColor="rgba(255,255,255,0.1)" />
-      <EditScreenInfo path="app/(tabs)/index.tsx" />
+    <View className="flex-1 bg-white dark:bg-gray-900">
+      <View className="p-4 border-b border-gray-200 dark:border-gray-800">
+        <View className="flex-row items-center justify-between mb-3">
+          <TouchableOpacity onPress={goToPreviousWeek}>
+            <FontAwesome name="chevron-left" size={24} color="#3B82F6" />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={goToToday}>
+            <Text className="text-lg font-semibold text-gray-900 dark:text-white">
+              Week of{' '}
+              {selectedWeekStart.toLocaleDateString(undefined, {
+                month: 'short',
+                day: 'numeric',
+              })}
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={goToNextWeek}>
+            <FontAwesome name="chevron-right" size={24} color="#3B82F6" />
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        className="flex-1"
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
+        {weekDates.map((date, dayIndex) => {
+          const meals = getMealsForDate(date);
+          return (
+            <View key={dayIndex} className="w-72 border-r border-gray-200 dark:border-gray-800">
+              <View
+                className={`p-3 border-b border-gray-200 dark:border-gray-800 ${
+                  isToday(date) ? 'bg-blue-100 dark:bg-blue-900' : ''
+                }`}
+              >
+                <Text
+                  className={`text-center font-semibold ${
+                    isToday(date)
+                      ? 'text-blue-800 dark:text-blue-200'
+                      : 'text-gray-900 dark:text-white'
+                  }`}
+                >
+                  {formatDateHeader(date)}
+                </Text>
+              </View>
+
+              <ScrollView className="flex-1 p-2">
+                {MEAL_TYPES.map((mealType) => {
+                  const mealsForType = meals.filter(
+                    (m) => m.meal_type === mealType
+                  );
+                  return (
+                    <View key={mealType} className="mb-4">
+                      <Text className="text-xs uppercase text-gray-500 dark:text-gray-400 font-semibold mb-2">
+                        {mealType}
+                      </Text>
+                      {mealsForType.length > 0 ? (
+                        mealsForType.map((meal) => {
+                          const recipe = recipes.find(
+                            (r) => r.id === meal.recipe_id
+                          );
+                          return (
+                            <TouchableOpacity
+                              key={meal.id}
+                              className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3 mb-2"
+                              onLongPress={() => handleDeleteMeal(meal.id)}
+                            >
+                              <Text className="text-gray-900 dark:text-white font-medium">
+                                {recipe?.title || meal.meal_name || 'Meal'}
+                              </Text>
+                              {recipe?.is_favorite && (
+                                <FontAwesome
+                                  name="star"
+                                  size={12}
+                                  color="#EAB308"
+                                  style={{ marginTop: 4 }}
+                                />
+                              )}
+                            </TouchableOpacity>
+                          );
+                        })
+                      ) : (
+                        <TouchableOpacity
+                          className="bg-gray-100 dark:bg-gray-800 rounded-lg p-3 items-center border border-dashed border-gray-300 dark:border-gray-700"
+                          onPress={() => handleAddMeal(date, mealType)}
+                        >
+                          <FontAwesome name="plus" size={16} color="#9CA3AF" />
+                        </TouchableOpacity>
+                      )}
+                    </View>
+                  );
+                })}
+              </ScrollView>
+            </View>
+          );
+        })}
+      </ScrollView>
+
+      <Modal
+        visible={modalVisible}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View className="flex-1 justify-end bg-black/50">
+          <View className="bg-white dark:bg-gray-900 rounded-t-3xl p-6 max-h-3/4">
+            <View className="flex-row justify-between items-center mb-4">
+              <Text className="text-xl font-bold text-gray-900 dark:text-white">
+                Add {selectedMealType}
+              </Text>
+              <TouchableOpacity onPress={() => setModalVisible(false)}>
+                <FontAwesome name="times" size={24} color="#9CA3AF" />
+              </TouchableOpacity>
+            </View>
+
+            {favoriteRecipes.length > 0 && (
+              <View className="mb-4">
+                <Text className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                  Favorites
+                </Text>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                  {favoriteRecipes.map((recipe) => (
+                    <TouchableOpacity
+                      key={recipe.id}
+                      className="bg-yellow-100 dark:bg-yellow-900 rounded-lg p-3 mr-2"
+                      onPress={() => handleSelectRecipe(recipe.id)}
+                    >
+                      <FontAwesome name="star" size={16} color="#EAB308" />
+                      <Text className="text-gray-900 dark:text-white font-medium mt-1">
+                        {recipe.title}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+              </View>
+            )}
+
+            <Text className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+              All Recipes
+            </Text>
+            <ScrollView>
+              {recipes.map((recipe) => (
+                <TouchableOpacity
+                  key={recipe.id}
+                  className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 mb-2 flex-row justify-between items-center"
+                  onPress={() => handleSelectRecipe(recipe.id)}
+                >
+                  <Text className="text-gray-900 dark:text-white font-medium flex-1">
+                    {recipe.title}
+                  </Text>
+                  {recipe.is_favorite && (
+                    <FontAwesome name="star" size={16} color="#EAB308" />
+                  )}
+                </TouchableOpacity>
+              ))}
+              {recipes.length === 0 && (
+                <Text className="text-center text-gray-500 dark:text-gray-400 py-4">
+                  No recipes yet. Add recipes first!
+                </Text>
+              )}
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-  separator: {
-    marginVertical: 30,
-    height: 1,
-    width: '80%',
-  },
-});
