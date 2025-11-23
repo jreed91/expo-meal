@@ -5,14 +5,26 @@ const apiKey = process.env.EXPO_PUBLIC_ANTHROPIC_API_KEY || '';
 // Custom fetch for React Native compatibility
 const customFetch: typeof fetch = async (url, init) => {
   console.log('📡 Fetching:', url);
-  console.log('📋 Request headers:', init?.headers);
+  console.log('📋 Original headers:', init?.headers);
+
+  // Ensure headers are properly formatted for React Native
+  const headers = new Headers(init?.headers);
+
+  // The SDK should add x-api-key, but let's ensure it's there
+  if (apiKey && !headers.has('x-api-key')) {
+    headers.set('x-api-key', apiKey);
+  }
+
+  // Add anthropic-version if not present
+  if (!headers.has('anthropic-version')) {
+    headers.set('anthropic-version', '2023-06-01');
+  }
+
+  console.log('📋 Final headers:', Object.fromEntries(headers.entries()));
 
   const response = await fetch(url, {
     ...init,
-    headers: {
-      ...init?.headers,
-      'anthropic-version': '2023-06-01',
-    },
+    headers: headers,
   });
 
   console.log('📥 Response status:', response.status, response.statusText);
