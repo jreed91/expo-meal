@@ -1,14 +1,23 @@
 import Anthropic from '@anthropic-ai/sdk';
-import { useAuthStore } from '@/store/authStore';
-import { useRecipeStore } from '@/store/recipeStore';
-import { useMealPlanStore } from '@/store/mealPlanStore';
-import { usePantryStore } from '@/store/pantryStore';
 
 const apiKey = process.env.EXPO_PUBLIC_ANTHROPIC_API_KEY || '';
+
+// Custom fetch for React Native compatibility
+const customFetch: typeof fetch = async (url, init) => {
+  console.log('Fetching:', url);
+  return fetch(url, {
+    ...init,
+    headers: {
+      ...init?.headers,
+      'anthropic-version': '2023-06-01',
+    },
+  });
+};
 
 export const anthropic = new Anthropic({
   apiKey,
   dangerouslyAllowBrowser: true, // Note: In production, use a backend proxy
+  fetch: customFetch,
 });
 
 export interface Message {
@@ -182,10 +191,19 @@ export const sendMessage = async (
   contextPrompt: string
 ): Promise<SendMessageResponse> => {
   try {
+    // Validate API key
+    if (!apiKey || apiKey === 'your-anthropic-api-key-here') {
+      throw new Error(
+        'Anthropic API key not configured. Please set EXPO_PUBLIC_ANTHROPIC_API_KEY in your .env file.'
+      );
+    }
+
     const formattedMessages = messages.map((msg) => ({
       role: msg.role,
       content: msg.content,
     }));
+
+    console.log('Sending message to Claude with model: claude-3-5-sonnet-20241022');
 
     const response = await anthropic.messages.create({
       model: 'claude-3-5-sonnet-20241022',
@@ -215,8 +233,30 @@ export const sendMessage = async (
       text: textContent,
       toolCalls: toolCalls.length > 0 ? toolCalls : undefined,
     };
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error sending message to Claude:', error);
+    console.error('Error details:', {
+      message: error.message,
+      status: error.status,
+      type: error.type,
+      error: error.error,
+    });
+
+    // Provide more helpful error messages
+    if (error.status === 404) {
+      throw new Error(
+        'API endpoint not found (404). This may be due to React Native compatibility issues with the Anthropic SDK. Consider using a backend proxy instead of dangerouslyAllowBrowser.'
+      );
+    } else if (error.status === 401) {
+      throw new Error(
+        'Invalid API key. Please check your EXPO_PUBLIC_ANTHROPIC_API_KEY in .env file.'
+      );
+    } else if (error.message?.includes('network') || error.message?.includes('fetch')) {
+      throw new Error(
+        'Network error. Please check your internet connection and ensure the Anthropic API is accessible.'
+      );
+    }
+
     throw error;
   }
 };

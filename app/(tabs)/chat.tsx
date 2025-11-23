@@ -9,6 +9,8 @@ import {
   Platform,
   ActivityIndicator,
   Alert,
+  Keyboard,
+  TouchableWithoutFeedback,
 } from 'react-native';
 import { useAuthStore } from '@/store/authStore';
 import { useRecipeStore } from '@/store/recipeStore';
@@ -133,6 +135,7 @@ export default function ChatScreen() {
 
     setMessages((prev) => [...prev, userMessage]);
     setInputText('');
+    Keyboard.dismiss();
     setLoading(true);
 
     try {
@@ -199,6 +202,7 @@ export default function ChatScreen() {
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       className="flex-1 bg-white dark:bg-gray-900"
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
     >
       <View className="p-4 border-b border-gray-200 dark:border-gray-800">
         <Text className="text-2xl font-bold text-gray-900 dark:text-white">
@@ -209,6 +213,7 @@ export default function ChatScreen() {
       <ScrollView
         ref={scrollViewRef}
         className="flex-1 p-4"
+        keyboardShouldPersistTaps="handled"
         onContentSizeChange={() =>
           scrollViewRef.current?.scrollToEnd({ animated: true })
         }
@@ -286,18 +291,20 @@ export default function ChatScreen() {
         )}
       </ScrollView>
 
-      <View className="p-4 border-t border-gray-200 dark:border-gray-800">
-        <View className="flex-row items-center space-x-2">
+      <View className="p-4 border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">
+        <View className="flex-row items-center gap-2">
           <TextInput
             className="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
             placeholder="Ask me anything about cooking..."
             placeholderTextColor="#9CA3AF"
             value={inputText}
             onChangeText={setInputText}
-            multiline
             maxLength={500}
             editable={!loading}
+            returnKeyType="send"
+            blurOnSubmit={false}
             onSubmitEditing={handleSend}
+            enablesReturnKeyAutomatically
           />
           <TouchableOpacity
             className={`p-3 rounded-lg ${
