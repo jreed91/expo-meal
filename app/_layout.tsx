@@ -27,6 +27,14 @@ export default function RootLayout() {
   const [loaded, error] = useFonts({
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    'Nunito-Regular': require('../assets/fonts/Nunito-Regular.ttf'),
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    'Nunito-Medium': require('../assets/fonts/Nunito-Medium.ttf'),
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    'Nunito-SemiBold': require('../assets/fonts/Nunito-SemiBold.ttf'),
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    'Nunito-Bold': require('../assets/fonts/Nunito-Bold.ttf'),
     ...FontAwesome.font,
   });
   const { initialize, initialized } = useAuthStore();

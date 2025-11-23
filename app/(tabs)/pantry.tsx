@@ -105,9 +105,9 @@ export default function PantryScreen() {
   };
 
   return (
-    <View className="flex-1 bg-white dark:bg-gray-900">
-      <View className="p-4 border-b border-gray-200 dark:border-gray-800">
-        <Text className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+    <View className="flex-1 bg-cream-100 dark:bg-neutral-900">
+      <View className="p-4 border-b border-cream-300 dark:border-neutral-800">
+        <Text className="text-2xl font-bold text-neutral-900 dark:text-white mb-4">
           Pantry
         </Text>
 
@@ -124,7 +124,7 @@ export default function PantryScreen() {
         )}
 
         <TouchableOpacity
-          className="bg-blue-600 py-3 rounded-lg items-center"
+          className="bg-primary-500 py-3 rounded-lg items-center"
           onPress={() => setModalVisible(true)}
         >
           <Text className="text-white font-semibold">Add Item</Text>
@@ -140,7 +140,7 @@ export default function PantryScreen() {
         {pantryItems.length === 0 ? (
           <View className="flex-1 items-center justify-center py-12">
             <FontAwesome name="archive" size={48} color="#9CA3AF" />
-            <Text className="text-gray-600 dark:text-gray-400 mt-4 text-center">
+            <Text className="text-neutral-600 dark:text-neutral-400 mt-4 text-center">
               No items in pantry{'\n'}Add items to track your inventory
             </Text>
           </View>
@@ -158,19 +158,19 @@ export default function PantryScreen() {
                       ? 'bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800'
                       : expiring
                         ? 'bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800'
-                        : 'bg-gray-50 dark:bg-gray-800'
+                        : 'bg-cream-50 dark:bg-neutral-800'
                   }`}
                 >
                   <View className="flex-row justify-between items-start mb-2">
                     <View className="flex-1">
-                      <Text className="text-lg font-semibold text-gray-900 dark:text-white">
+                      <Text className="text-lg font-semibold text-neutral-900 dark:text-white">
                         {item.name}
                       </Text>
-                      <Text className="text-gray-600 dark:text-gray-400">
+                      <Text className="text-neutral-600 dark:text-neutral-400">
                         {item.quantity} {item.unit}
                       </Text>
                       {item.category && (
-                        <Text className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                        <Text className="text-sm text-neutral-500 dark:text-neutral-400 mt-1">
                           {item.category}
                         </Text>
                       )}
@@ -194,10 +194,10 @@ export default function PantryScreen() {
                       <Text
                         className={`text-sm ml-2 ${
                           expired
-                            ? 'text-red-600 dark:text-red-400 font-semibold'
+                            ? 'text-danger-600 dark:text-red-400 font-semibold'
                             : expiring
                               ? 'text-yellow-600 dark:text-yellow-400 font-semibold'
-                              : 'text-gray-500 dark:text-gray-400'
+                              : 'text-neutral-500 dark:text-neutral-400'
                         }`}
                       >
                         Expires{' '}
@@ -222,9 +222,9 @@ export default function PantryScreen() {
         onRequestClose={() => setModalVisible(false)}
       >
         <View className="flex-1 justify-end bg-black/50">
-          <View className="bg-white dark:bg-gray-900 rounded-t-3xl p-6">
+          <View className="bg-cream-100 dark:bg-neutral-900 rounded-t-3xl p-6">
             <View className="flex-row justify-between items-center mb-4">
-              <Text className="text-xl font-bold text-gray-900 dark:text-white">
+              <Text className="text-xl font-bold text-neutral-900 dark:text-white">
                 Add Pantry Item
               </Text>
               <TouchableOpacity onPress={() => setModalVisible(false)}>
@@ -234,49 +234,49 @@ export default function PantryScreen() {
 
             <ScrollView>
               <TextInput
-                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white mb-3"
+                className="w-full px-4 py-3 border border-neutral-300 dark:border-neutral-700 rounded-lg bg-cream-100 dark:bg-neutral-800 text-neutral-900 dark:text-white mb-3"
                 placeholder="Item name *"
-                placeholderTextColor="#9CA3AF"
+                placeholderTextColor="#A8A29E"
                 value={itemName}
                 onChangeText={setItemName}
               />
 
               <View className="flex-row space-x-3 mb-3">
                 <TextInput
-                  className="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                  className="flex-1 px-4 py-3 border border-neutral-300 dark:border-neutral-700 rounded-lg bg-cream-100 dark:bg-neutral-800 text-neutral-900 dark:text-white"
                   placeholder="Quantity *"
-                  placeholderTextColor="#9CA3AF"
+                  placeholderTextColor="#A8A29E"
                   value={itemQuantity}
                   onChangeText={setItemQuantity}
                   keyboardType="numeric"
                 />
                 <TextInput
-                  className="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                  className="flex-1 px-4 py-3 border border-neutral-300 dark:border-neutral-700 rounded-lg bg-cream-100 dark:bg-neutral-800 text-neutral-900 dark:text-white"
                   placeholder="Unit"
-                  placeholderTextColor="#9CA3AF"
+                  placeholderTextColor="#A8A29E"
                   value={itemUnit}
                   onChangeText={setItemUnit}
                 />
               </View>
 
               <TextInput
-                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white mb-3"
+                className="w-full px-4 py-3 border border-neutral-300 dark:border-neutral-700 rounded-lg bg-cream-100 dark:bg-neutral-800 text-neutral-900 dark:text-white mb-3"
                 placeholder="Category (e.g., Dairy, Produce)"
-                placeholderTextColor="#9CA3AF"
+                placeholderTextColor="#A8A29E"
                 value={itemCategory}
                 onChangeText={setItemCategory}
               />
 
               <TextInput
-                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white mb-4"
+                className="w-full px-4 py-3 border border-neutral-300 dark:border-neutral-700 rounded-lg bg-cream-100 dark:bg-neutral-800 text-neutral-900 dark:text-white mb-4"
                 placeholder="Expiry date (YYYY-MM-DD)"
-                placeholderTextColor="#9CA3AF"
+                placeholderTextColor="#A8A29E"
                 value={expiryDate}
                 onChangeText={setExpiryDate}
               />
 
               <TouchableOpacity
-                className="bg-blue-600 py-3 rounded-lg items-center"
+                className="bg-primary-500 py-3 rounded-lg items-center"
                 onPress={handleAddItem}
               >
                 <Text className="text-white font-semibold">Add to Pantry</Text>

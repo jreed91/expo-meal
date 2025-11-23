@@ -52,28 +52,28 @@ export default function SignUpScreen() {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      className="flex-1 bg-white dark:bg-gray-900"
+      className="flex-1 bg-cream-100 dark:bg-neutral-900"
     >
       <ScrollView
         contentContainerClassName="flex-grow justify-center px-6 py-8"
         keyboardShouldPersistTaps="handled"
       >
-        <Text className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
+        <Text className="text-4xl font-bold text-neutral-900 dark:text-neutral-50 mb-2">
           Create Account
         </Text>
-        <Text className="text-gray-600 dark:text-gray-400 mb-8">
+        <Text className="text-neutral-600 dark:text-neutral-400 mb-8">
           Start planning your meals today
         </Text>
 
         <View className="space-y-4">
           <View>
-            <Text className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <Text className="text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
               Full Name *
             </Text>
             <TextInput
-              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+              className="w-full px-4 py-3 border border-neutral-300 dark:border-neutral-700 rounded-xl bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white"
               placeholder="John Doe"
-              placeholderTextColor="#9CA3AF"
+              placeholderTextColor="#A8A29E"
               value={fullName}
               onChangeText={setFullName}
               editable={!loading}
@@ -81,13 +81,13 @@ export default function SignUpScreen() {
           </View>
 
           <View>
-            <Text className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <Text className="text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
               Email *
             </Text>
             <TextInput
-              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+              className="w-full px-4 py-3 border border-neutral-300 dark:border-neutral-700 rounded-xl bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white"
               placeholder="your@email.com"
-              placeholderTextColor="#9CA3AF"
+              placeholderTextColor="#A8A29E"
               value={email}
               onChangeText={setEmail}
               autoCapitalize="none"
@@ -97,13 +97,13 @@ export default function SignUpScreen() {
           </View>
 
           <View>
-            <Text className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <Text className="text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
               Password *
             </Text>
             <TextInput
-              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+              className="w-full px-4 py-3 border border-neutral-300 dark:border-neutral-700 rounded-xl bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white"
               placeholder="••••••••"
-              placeholderTextColor="#9CA3AF"
+              placeholderTextColor="#A8A29E"
               value={password}
               onChangeText={setPassword}
               secureTextEntry
@@ -112,13 +112,13 @@ export default function SignUpScreen() {
           </View>
 
           <View>
-            <Text className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <Text className="text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
               Confirm Password *
             </Text>
             <TextInput
-              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+              className="w-full px-4 py-3 border border-neutral-300 dark:border-neutral-700 rounded-xl bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white"
               placeholder="••••••••"
-              placeholderTextColor="#9CA3AF"
+              placeholderTextColor="#A8A29E"
               value={confirmPassword}
               onChangeText={setConfirmPassword}
               secureTextEntry
@@ -127,7 +127,7 @@ export default function SignUpScreen() {
           </View>
 
           <TouchableOpacity
-            className="w-full bg-blue-600 py-4 rounded-lg items-center mt-4"
+            className="w-full bg-primary-500 py-4 rounded-xl items-center mt-4 active:bg-primary-600"
             onPress={handleSignUp}
             disabled={loading}
           >
@@ -139,11 +139,11 @@ export default function SignUpScreen() {
           </TouchableOpacity>
 
           <View className="flex-row justify-center items-center mt-4">
-            <Text className="text-gray-600 dark:text-gray-400">
+            <Text className="text-neutral-600 dark:text-neutral-400">
               Already have an account?{' '}
             </Text>
             <TouchableOpacity onPress={() => router.push('/auth/login')}>
-              <Text className="text-blue-600 font-semibold">Sign In</Text>
+              <Text className="text-primary-500 font-semibold">Sign In</Text>
             </TouchableOpacity>
           </View>
         </View>

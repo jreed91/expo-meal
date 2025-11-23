@@ -40,15 +40,15 @@ export default function RecipesScreen() {
   const filteredRecipes = getFilteredRecipes();
 
   return (
-    <View className="flex-1 bg-white dark:bg-gray-900">
-      <View className="p-4 border-b border-gray-200 dark:border-gray-800">
+    <View className="flex-1 bg-cream-100 dark:bg-neutral-900">
+      <View className="p-4 border-b border-cream-300 dark:border-neutral-800">
         <View className="flex-row items-center space-x-2 mb-3">
-          <View className="flex-1 flex-row items-center bg-gray-100 dark:bg-gray-800 rounded-lg px-3 py-2">
+          <View className="flex-1 flex-row items-center bg-gray-100 dark:bg-neutral-800 rounded-lg px-3 py-2">
             <FontAwesome name="search" size={16} color="#9CA3AF" />
             <TextInput
-              className="flex-1 ml-2 text-gray-900 dark:text-white"
+              className="flex-1 ml-2 text-neutral-900 dark:text-white"
               placeholder="Search recipes..."
-              placeholderTextColor="#9CA3AF"
+              placeholderTextColor="#A8A29E"
               value={searchQuery}
               onChangeText={setSearchQuery}
             />
@@ -56,8 +56,8 @@ export default function RecipesScreen() {
           <TouchableOpacity
             className={`p-2 rounded-lg ${
               favoriteFilter
-                ? 'bg-yellow-500'
-                : 'bg-gray-100 dark:bg-gray-800'
+                ? 'bg-warning-500'
+                : 'bg-gray-100 dark:bg-neutral-800'
             }`}
             onPress={() => setFavoriteFilter(!favoriteFilter)}
           >
@@ -70,7 +70,7 @@ export default function RecipesScreen() {
         </View>
 
         <TouchableOpacity
-          className="bg-blue-600 py-3 rounded-lg items-center"
+          className="bg-primary-500 py-3 rounded-lg items-center"
           onPress={() => router.push('/recipe/add')}
         >
           <Text className="text-white font-semibold">Add Recipe</Text>
@@ -85,12 +85,12 @@ export default function RecipesScreen() {
       >
         {loading && !refreshing ? (
           <View className="flex-1 items-center justify-center py-12">
-            <ActivityIndicator size="large" color="#3B82F6" />
+            <ActivityIndicator size="large" color="#FF7A55" />
           </View>
         ) : filteredRecipes.length === 0 ? (
           <View className="flex-1 items-center justify-center py-12">
             <FontAwesome name="book" size={48} color="#9CA3AF" />
-            <Text className="text-gray-600 dark:text-gray-400 mt-4 text-center">
+            <Text className="text-neutral-600 dark:text-neutral-400 mt-4 text-center">
               {searchQuery || favoriteFilter
                 ? 'No recipes found'
                 : 'No recipes yet\nAdd your first recipe to get started!'}
@@ -101,11 +101,11 @@ export default function RecipesScreen() {
             {filteredRecipes.map((recipe) => (
               <TouchableOpacity
                 key={recipe.id}
-                className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 mb-3"
+                className="bg-cream-50 dark:bg-neutral-800 rounded-lg p-4 mb-3"
                 onPress={() => router.push(`/recipe/${recipe.id}`)}
               >
                 <View className="flex-row justify-between items-start mb-2">
-                  <Text className="text-lg font-semibold text-gray-900 dark:text-white flex-1">
+                  <Text className="text-lg font-semibold text-neutral-900 dark:text-white flex-1">
                     {recipe.title}
                   </Text>
                   <TouchableOpacity
@@ -126,7 +126,7 @@ export default function RecipesScreen() {
                   {recipe.prep_time && (
                     <View className="flex-row items-center">
                       <FontAwesome name="clock-o" size={14} color="#9CA3AF" />
-                      <Text className="text-sm text-gray-600 dark:text-gray-400 ml-1">
+                      <Text className="text-sm text-neutral-600 dark:text-neutral-400 ml-1">
                         {recipe.prep_time}m prep
                       </Text>
                     </View>
@@ -134,7 +134,7 @@ export default function RecipesScreen() {
                   {recipe.cook_time && (
                     <View className="flex-row items-center">
                       <FontAwesome name="fire" size={14} color="#9CA3AF" />
-                      <Text className="text-sm text-gray-600 dark:text-gray-400 ml-1">
+                      <Text className="text-sm text-neutral-600 dark:text-neutral-400 ml-1">
                         {recipe.cook_time}m cook
                       </Text>
                     </View>
@@ -142,7 +142,7 @@ export default function RecipesScreen() {
                   {recipe.servings && (
                     <View className="flex-row items-center">
                       <FontAwesome name="users" size={14} color="#9CA3AF" />
-                      <Text className="text-sm text-gray-600 dark:text-gray-400 ml-1">
+                      <Text className="text-sm text-neutral-600 dark:text-neutral-400 ml-1">
                         {recipe.servings} servings
                       </Text>
                     </View>
