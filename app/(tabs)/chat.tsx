@@ -17,6 +17,7 @@ import { useRecipeStore } from '@/store/recipeStore';
 import { useMealPlanStore } from '@/store/mealPlanStore';
 import { usePantryStore } from '@/store/pantryStore';
 import { useGroceryStore } from '@/store/groceryStore';
+import { useChatStore } from '@/store/chatStore';
 import { Message, buildContextPrompt, sendMessage, ToolCall } from '@/lib/claude';
 import { supabase } from '@/lib/supabase';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
@@ -34,26 +35,38 @@ export default function ChatScreen() {
     fetchGroceryLists,
     fetchGroceryListItems,
   } = useGroceryStore();
+  const {
+    messages: storedMessages,
+    loadMessages,
+    addMessage,
+    clearMessages,
+    saveConversation,
+  } = useChatStore();
 
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: '1',
-      role: 'assistant',
-      content:
-        "Hi! I'm Claude, your cooking and meal planning assistant. I can help you with recipe suggestions, cooking tips, meal planning, and more. I can also help you add meals to your plan, manage your pantry and grocery list, and update your allergy information. What would you like to do?",
-      timestamp: new Date(),
-    },
-  ]);
   const [inputText, setInputText] = useState('');
   const [loading, setLoading] = useState(false);
   const scrollViewRef = useRef<ScrollView>(null);
 
-  // Load grocery lists on mount and their items
+  // Use stored messages or default welcome message
+  const messages =
+    storedMessages.length > 0
+      ? storedMessages
+      : [
+          {
+            id: '1',
+            role: 'assistant' as const,
+            content:
+              "Hi! I'm Claude, your cooking and meal planning assistant. I can help you with recipe suggestions, cooking tips, meal planning, and more. I can also help you add meals to your plan, manage your pantry and grocery list, and update your allergy information. What would you like to do?",
+            timestamp: new Date(),
+          },
+        ];
+
+  // Load chat messages and grocery lists on mount
   useEffect(() => {
-    const loadGroceryData = async () => {
-      await fetchGroceryLists();
+    const loadData = async () => {
+      await Promise.all([loadMessages(), fetchGroceryLists()]);
     };
-    loadGroceryData();
+    loadData();
   }, []);
 
   // Load items when grocery lists change
@@ -193,7 +206,7 @@ export default function ChatScreen() {
       timestamp: new Date(),
     };
 
-    setMessages((prev) => [...prev, userMessage]);
+    await addMessage(userMessage);
     setInputText('');
     Keyboard.dismiss();
     setLoading(true);
@@ -235,7 +248,12 @@ export default function ChatScreen() {
         toolCalls: executedTools.length > 0 ? executedTools : undefined,
       };
 
-      setMessages((prev) => [...prev, assistantMessage]);
+      await addMessage(assistantMessage);
+
+      // Save conversation to Supabase (non-blocking)
+      saveConversation().catch((err) =>
+        console.error('Failed to save conversation:', err)
+      );
     } catch (error: any) {
       console.error('Error sending message:', error);
       Alert.alert(
@@ -258,6 +276,23 @@ export default function ChatScreen() {
     setInputText(prompt);
   };
 
+  const handleNewChat = () => {
+    Alert.alert(
+      'Start New Chat',
+      'This will clear your current conversation. Continue?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'New Chat',
+          style: 'destructive',
+          onPress: async () => {
+            await clearMessages();
+          },
+        },
+      ]
+    );
+  };
+
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <KeyboardAvoidingView
@@ -266,12 +301,26 @@ export default function ChatScreen() {
         keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
       >
         <View className="p-4 border-b border-gray-200 dark:border-gray-800">
-          <Text className="text-2xl font-bold text-gray-900 dark:text-white">
-            Chat with Claude
-          </Text>
-          <Text className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-            Tap anywhere to dismiss keyboard
-          </Text>
+          <View className="flex-row items-center justify-between">
+            <View className="flex-1">
+              <Text className="text-2xl font-bold text-gray-900 dark:text-white">
+                Chat with Claude
+              </Text>
+              <Text className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                {storedMessages.length > 0
+                  ? `${storedMessages.length} messages • Auto-saved`
+                  : 'Tap anywhere to dismiss keyboard'}
+              </Text>
+            </View>
+            {storedMessages.length > 0 && (
+              <TouchableOpacity
+                onPress={handleNewChat}
+                className="ml-3 p-2 bg-gray-100 dark:bg-gray-800 rounded-lg"
+              >
+                <FontAwesome name="plus" size={18} color="#6B7280" />
+              </TouchableOpacity>
+            )}
+          </View>
         </View>
 
         <ScrollView
