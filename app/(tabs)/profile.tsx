@@ -1,22 +1,13 @@
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  TextInput,
-  Alert,
-} from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, TextInput, Alert } from 'react-native';
 import { useAuthStore } from '@/store/authStore';
-import { supabase } from '@/lib/supabase';
+import * as profileApi from '@/lib/profileApi';
 
 export default function ProfileScreen() {
   const { profile, user, signOut, fetchProfile } = useAuthStore();
   const [editing, setEditing] = useState(false);
   const [fullName, setFullName] = useState(profile?.full_name || '');
-  const [allergies, setAllergies] = useState(
-    profile?.allergies?.join(', ') || ''
-  );
+  const [allergies, setAllergies] = useState(profile?.allergies?.join(', ') || '');
   const [loading, setLoading] = useState(false);
 
   const handleSave = async () => {
@@ -29,15 +20,10 @@ export default function ProfileScreen() {
         .map((a) => a.trim())
         .filter((a) => a);
 
-      const { error } = await supabase
-        .from('profiles')
-        .update({
-          full_name: fullName,
-          allergies: allergiesArray,
-        })
-        .eq('id', user.id);
-
-      if (error) throw error;
+      await profileApi.updateProfile({
+        full_name: fullName,
+        allergies: allergiesArray,
+      });
 
       await fetchProfile();
       setEditing(false);
@@ -71,17 +57,11 @@ export default function ProfileScreen() {
   return (
     <ScrollView className="flex-1 bg-cream-100 dark:bg-neutral-900">
       <View className="p-6">
-        <Text className="text-3xl font-bold text-neutral-900 dark:text-white mb-6">
-          Profile
-        </Text>
+        <Text className="text-3xl font-bold text-neutral-900 dark:text-white mb-6">Profile</Text>
 
         <View className="bg-cream-50 dark:bg-neutral-800 rounded-xl p-4 mb-6">
-          <Text className="text-sm text-neutral-600 dark:text-neutral-400 mb-1">
-            Email
-          </Text>
-          <Text className="text-lg text-neutral-900 dark:text-white">
-            {user?.email}
-          </Text>
+          <Text className="text-sm text-neutral-600 dark:text-neutral-400 mb-1">Email</Text>
+          <Text className="text-lg text-neutral-900 dark:text-white">{user?.email}</Text>
         </View>
 
         <View className="mb-4">
@@ -148,9 +128,7 @@ export default function ProfileScreen() {
               onPress={handleCancel}
               disabled={loading}
             >
-              <Text className="text-neutral-700 dark:text-neutral-300 font-semibold">
-                Cancel
-              </Text>
+              <Text className="text-neutral-700 dark:text-neutral-300 font-semibold">Cancel</Text>
             </TouchableOpacity>
           </View>
         ) : (

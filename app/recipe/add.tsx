@@ -98,9 +98,7 @@ export default function AddRecipeScreen() {
         <TouchableOpacity onPress={() => router.back()}>
           <FontAwesome name="arrow-left" size={24} color="#FF7A55" />
         </TouchableOpacity>
-        <Text className="text-xl font-bold text-neutral-900 dark:text-white">
-          Add Recipe
-        </Text>
+        <Text className="text-xl font-bold text-neutral-900 dark:text-white">Add Recipe</Text>
         <View style={{ width: 24 }} />
       </View>
 
@@ -129,9 +127,7 @@ export default function AddRecipeScreen() {
                 placeholder="Name"
                 placeholderTextColor="#A8A29E"
                 value={ingredient.name}
-                onChangeText={(value) =>
-                  updateIngredient(index, 'name', value)
-                }
+                onChangeText={(value) => updateIngredient(index, 'name', value)}
               />
             </View>
             <View className="w-20 mr-2">

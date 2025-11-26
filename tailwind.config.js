@@ -83,8 +83,24 @@ module.exports = {
         },
       },
       fontFamily: {
-        sans: ['-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif'],
-        rounded: ['-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif'],
+        sans: [
+          '-apple-system',
+          'BlinkMacSystemFont',
+          'Segoe UI',
+          'Roboto',
+          'Helvetica Neue',
+          'Arial',
+          'sans-serif',
+        ],
+        rounded: [
+          '-apple-system',
+          'BlinkMacSystemFont',
+          'Segoe UI',
+          'Roboto',
+          'Helvetica Neue',
+          'Arial',
+          'sans-serif',
+        ],
       },
       borderRadius: {
         '4xl': '2rem',
@@ -96,9 +112,9 @@ module.exports = {
         'gradient-sunset': 'linear-gradient(135deg, #FF7A55 0%, #FBBF24 100%)',
       },
       boxShadow: {
-        'soft': '0 2px 8px rgba(0, 0, 0, 0.04)',
+        soft: '0 2px 8px rgba(0, 0, 0, 0.04)',
         'soft-lg': '0 4px 16px rgba(0, 0, 0, 0.06)',
-        'warm': '0 4px 16px rgba(255, 122, 85, 0.15)',
+        warm: '0 4px 16px rgba(255, 122, 85, 0.15)',
       },
     },
   },

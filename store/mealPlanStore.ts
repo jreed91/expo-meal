@@ -1,9 +1,9 @@
 import { create } from 'zustand';
-import { supabase } from '@/lib/supabase';
 import { Database } from '@/types/database.types';
+import * as mealPlanApi from '@/lib/mealPlanApi';
 
 type MealPlan = Database['public']['Tables']['meal_plans']['Row'];
-type MealPlanInsert = Database['public']['Tables']['meal_plans']['Insert'];
+type MealPlanInsert = Omit<Database['public']['Tables']['meal_plans']['Insert'], 'user_id'>;
 type MealPlanUpdate = Database['public']['Tables']['meal_plans']['Update'];
 
 interface MealPlanState {
@@ -11,9 +11,7 @@ interface MealPlanState {
   loading: boolean;
   selectedWeekStart: Date;
   fetchMealPlans: (startDate: Date, endDate: Date) => Promise<void>;
-  addMealPlan: (
-    mealPlan: Omit<MealPlanInsert, 'user_id'>
-  ) => Promise<MealPlan>;
+  addMealPlan: (mealPlan: MealPlanInsert) => Promise<MealPlan>;
   updateMealPlan: (id: string, mealPlan: MealPlanUpdate) => Promise<void>;
   deleteMealPlan: (id: string) => Promise<void>;
   setSelectedWeekStart: (date: Date) => void;
@@ -40,15 +38,8 @@ export const useMealPlanStore = create<MealPlanState>((set, get) => ({
   fetchMealPlans: async (startDate, endDate) => {
     try {
       set({ loading: true });
-      const { data, error } = await supabase
-        .from('meal_plans')
-        .select('*')
-        .gte('date', formatDate(startDate))
-        .lte('date', formatDate(endDate))
-        .order('date', { ascending: true });
-
-      if (error) throw error;
-      set({ mealPlans: data || [] });
+      const mealPlans = await mealPlanApi.fetchMealPlans(startDate, endDate);
+      set({ mealPlans });
     } catch (error) {
       console.error('Error fetching meal plans:', error);
     } finally {
@@ -58,43 +49,22 @@ export const useMealPlanStore = create<MealPlanState>((set, get) => ({
 
   addMealPlan: async (mealPlan) => {
     try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (!user) throw new Error('Not authenticated');
-
-      const { data, error } = await supabase
-        .from('meal_plans')
-        .insert([{ ...mealPlan, user_id: user.id }])
-        .select()
-        .single();
-
-      if (error) throw error;
-
+      const newMealPlan = await mealPlanApi.addMealPlan(mealPlan);
       set((state) => ({
-        mealPlans: [...state.mealPlans, data],
+        mealPlans: [...state.mealPlans, newMealPlan],
       }));
-
-      return data;
+      return newMealPlan;
     } catch (error) {
       console.error('Error adding meal plan:', error);
       throw error;
     }
   },
 
-  updateMealPlan: async (id, mealPlan) => {
+  updateMealPlan: async (id, updates) => {
     try {
-      const { error } = await supabase
-        .from('meal_plans')
-        .update(mealPlan)
-        .eq('id', id);
-
-      if (error) throw error;
-
+      const updatedMealPlan = await mealPlanApi.updateMealPlan(id, updates);
       set((state) => ({
-        mealPlans: state.mealPlans.map((m) =>
-          m.id === id ? { ...m, ...mealPlan } : m
-        ),
+        mealPlans: state.mealPlans.map((m) => (m.id === id ? updatedMealPlan : m)),
       }));
     } catch (error) {
       console.error('Error updating meal plan:', error);
@@ -104,10 +74,7 @@ export const useMealPlanStore = create<MealPlanState>((set, get) => ({
 
   deleteMealPlan: async (id) => {
     try {
-      const { error } = await supabase.from('meal_plans').delete().eq('id', id);
-
-      if (error) throw error;
-
+      await mealPlanApi.deleteMealPlan(id);
       set((state) => ({
         mealPlans: state.mealPlans.filter((m) => m.id !== id),
       }));

@@ -1,0 +1,22 @@
+# Supabase Edge Functions Configuration
+
+[functions.process-chat]
+verify_jwt = true
+
+[functions.get-messages]
+verify_jwt = true
+
+[functions.pantry]
+verify_jwt = true
+
+[functions.recipes]
+verify_jwt = true
+
+[functions.meal-plans]
+verify_jwt = true
+
+[functions.grocery-lists]
+verify_jwt = true
+
+[functions.profiles]
+verify_jwt = true

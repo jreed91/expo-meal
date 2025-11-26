@@ -1,12 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  Alert,
-  ActivityIndicator,
-} from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useRecipeStore } from '@/store/recipeStore';
 import { RecipeIngredient } from '@/types/database.types';
@@ -15,8 +8,7 @@ import FontAwesome from '@expo/vector-icons/FontAwesome';
 export default function RecipeDetailScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams();
-  const { recipes, deleteRecipe, toggleFavorite, fetchRecipes } =
-    useRecipeStore();
+  const { recipes, deleteRecipe, toggleFavorite, fetchRecipes } = useRecipeStore();
   const [loading, setLoading] = useState(false);
 
   const recipe = recipes.find((r) => r.id === id);
@@ -28,28 +20,24 @@ export default function RecipeDetailScreen() {
   }, []);
 
   const handleDelete = () => {
-    Alert.alert(
-      'Delete Recipe',
-      'Are you sure you want to delete this recipe?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              setLoading(true);
-              await deleteRecipe(id as string);
-              router.back();
-            } catch (error: any) {
-              Alert.alert('Error', error.message || 'Failed to delete recipe');
-            } finally {
-              setLoading(false);
-            }
-          },
+    Alert.alert('Delete Recipe', 'Are you sure you want to delete this recipe?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            setLoading(true);
+            await deleteRecipe(id as string);
+            router.back();
+          } catch (error: any) {
+            Alert.alert('Error', error.message || 'Failed to delete recipe');
+          } finally {
+            setLoading(false);
+          }
         },
-      ]
-    );
+      },
+    ]);
   };
 
   if (!recipe) {
@@ -69,10 +57,7 @@ export default function RecipeDetailScreen() {
           <FontAwesome name="arrow-left" size={24} color="#FF7A55" />
         </TouchableOpacity>
         <View className="flex-row space-x-4">
-          <TouchableOpacity
-            onPress={() => toggleFavorite(recipe.id)}
-            disabled={loading}
-          >
+          <TouchableOpacity onPress={() => toggleFavorite(recipe.id)} disabled={loading}>
             <FontAwesome
               name={recipe.is_favorite ? 'star' : 'star-o'}
               size={24}
@@ -133,9 +118,7 @@ export default function RecipeDetailScreen() {
                   key={index}
                   className="bg-blue-100 dark:bg-blue-900 px-3 py-1 rounded-full mr-2 mb-2"
                 >
-                  <Text className="text-sm text-blue-800 dark:text-blue-200">
-                    {tag}
-                  </Text>
+                  <Text className="text-sm text-blue-800 dark:text-blue-200">{tag}</Text>
                 </View>
               ))}
             </View>

@@ -1,9 +1,9 @@
 import { create } from 'zustand';
-import { supabase } from '@/lib/supabase';
-import { Database, RecipeIngredient } from '@/types/database.types';
+import { Database } from '@/types/database.types';
+import * as recipeApi from '@/lib/recipeApi';
 
 type Recipe = Database['public']['Tables']['recipes']['Row'];
-type RecipeInsert = Database['public']['Tables']['recipes']['Insert'];
+type RecipeInsert = Omit<Database['public']['Tables']['recipes']['Insert'], 'user_id'>;
 type RecipeUpdate = Database['public']['Tables']['recipes']['Update'];
 
 interface RecipeState {
@@ -12,7 +12,7 @@ interface RecipeState {
   searchQuery: string;
   favoriteFilter: boolean;
   fetchRecipes: () => Promise<void>;
-  addRecipe: (recipe: Omit<RecipeInsert, 'user_id'>) => Promise<Recipe>;
+  addRecipe: (recipe: RecipeInsert) => Promise<Recipe>;
   updateRecipe: (id: string, recipe: RecipeUpdate) => Promise<void>;
   deleteRecipe: (id: string) => Promise<void>;
   toggleFavorite: (id: string) => Promise<void>;
@@ -30,13 +30,8 @@ export const useRecipeStore = create<RecipeState>((set, get) => ({
   fetchRecipes: async () => {
     try {
       set({ loading: true });
-      const { data, error } = await supabase
-        .from('recipes')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      set({ recipes: data || [] });
+      const recipes = await recipeApi.fetchRecipes();
+      set({ recipes });
     } catch (error) {
       console.error('Error fetching recipes:', error);
     } finally {
@@ -46,43 +41,22 @@ export const useRecipeStore = create<RecipeState>((set, get) => ({
 
   addRecipe: async (recipe) => {
     try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (!user) throw new Error('Not authenticated');
-
-      const { data, error } = await supabase
-        .from('recipes')
-        .insert([{ ...recipe, user_id: user.id }])
-        .select()
-        .single();
-
-      if (error) throw error;
-
+      const newRecipe = await recipeApi.addRecipe(recipe);
       set((state) => ({
-        recipes: [data, ...state.recipes],
+        recipes: [newRecipe, ...state.recipes],
       }));
-
-      return data;
+      return newRecipe;
     } catch (error) {
       console.error('Error adding recipe:', error);
       throw error;
     }
   },
 
-  updateRecipe: async (id, recipe) => {
+  updateRecipe: async (id, updates) => {
     try {
-      const { error } = await supabase
-        .from('recipes')
-        .update(recipe)
-        .eq('id', id);
-
-      if (error) throw error;
-
+      const updatedRecipe = await recipeApi.updateRecipe(id, updates);
       set((state) => ({
-        recipes: state.recipes.map((r) =>
-          r.id === id ? { ...r, ...recipe } : r
-        ),
+        recipes: state.recipes.map((r) => (r.id === id ? updatedRecipe : r)),
       }));
     } catch (error) {
       console.error('Error updating recipe:', error);
@@ -92,10 +66,7 @@ export const useRecipeStore = create<RecipeState>((set, get) => ({
 
   deleteRecipe: async (id) => {
     try {
-      const { error } = await supabase.from('recipes').delete().eq('id', id);
-
-      if (error) throw error;
-
+      await recipeApi.deleteRecipe(id);
       set((state) => ({
         recipes: state.recipes.filter((r) => r.id !== id),
       }));

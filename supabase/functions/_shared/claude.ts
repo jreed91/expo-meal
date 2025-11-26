@@ -1,20 +1,6 @@
-const apiKey = process.env.EXPO_PUBLIC_ANTHROPIC_API_KEY || '';
+import { ToolCall } from './types.ts';
+
 const ANTHROPIC_API_URL = 'https://api.anthropic.com/v1/messages';
-
-export interface Message {
-  id: string;
-  role: 'user' | 'assistant';
-  content: string;
-  timestamp: Date;
-  toolCalls?: ToolCall[];
-}
-
-export interface ToolCall {
-  id: string;
-  name: string;
-  input: any;
-  result?: string;
-}
 
 // Tool definitions for Claude
 export const tools = [
@@ -67,8 +53,7 @@ export const tools = [
         },
         category: {
           type: 'string',
-          description:
-            'Optional category (e.g., dairy, meat, vegetables, grains)',
+          description: 'Optional category (e.g., dairy, meat, vegetables, grains)',
         },
         expiry_date: {
           type: 'string',
@@ -100,8 +85,7 @@ export const tools = [
         },
         category: {
           type: 'string',
-          description:
-            'Optional category (e.g., dairy, meat, vegetables, grains, bakery)',
+          description: 'Optional category (e.g., dairy, meat, vegetables, grains, bakery)',
         },
       },
       required: ['name'],
@@ -110,7 +94,7 @@ export const tools = [
   {
     name: 'update_allergies',
     description:
-      'Update the user\'s allergy information. Use this when the user mentions new allergies or wants to modify their allergy list.',
+      "Update the user's allergy information. Use this when the user mentions new allergies or wants to modify their allergy list.",
     input_schema: {
       type: 'object',
       properties: {
@@ -124,8 +108,7 @@ export const tools = [
         action: {
           type: 'string',
           enum: ['replace', 'add', 'remove'],
-          description:
-            'Whether to replace all allergies, add new ones, or remove specific ones',
+          description: 'Whether to replace all allergies, add new ones, or remove specific ones',
         },
       },
       required: ['allergies', 'action'],
@@ -141,7 +124,7 @@ export const buildContextPrompt = (
   groceryItems: any[]
 ): string => {
   const allergies = profile?.allergies || [];
-  const favoriteRecipes = recipes.filter((r) => r.is_favorite);
+  const favoriteRecipes = recipes.filter((r: any) => r.is_favorite);
 
   let context = `You are a helpful cooking and meal planning assistant with the ability to take actions. Here's the context about the user:\n\n`;
 
@@ -151,7 +134,7 @@ export const buildContextPrompt = (
 
   if (favoriteRecipes.length > 0) {
     context += `User's favorite recipes:\n`;
-    favoriteRecipes.slice(0, 5).forEach((recipe) => {
+    favoriteRecipes.slice(0, 5).forEach((recipe: any) => {
       context += `- ${recipe.title}\n`;
     });
     context += `\n`;
@@ -159,7 +142,7 @@ export const buildContextPrompt = (
 
   if (pantryItems.length > 0) {
     context += `Items currently in pantry:\n`;
-    pantryItems.slice(0, 15).forEach((item) => {
+    pantryItems.slice(0, 15).forEach((item: any) => {
       context += `- ${item.name} (${item.quantity} ${item.unit})\n`;
     });
     context += `\n`;
@@ -167,19 +150,23 @@ export const buildContextPrompt = (
 
   if (upcomingMeals.length > 0) {
     context += `Upcoming meals planned:\n`;
-    upcomingMeals.slice(0, 10).forEach((meal) => {
+    upcomingMeals.slice(0, 10).forEach((meal: any) => {
       const dateObj = new Date(meal.date);
-      const dateStr = dateObj.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+      const dateStr = dateObj.toLocaleDateString('en-US', {
+        weekday: 'short',
+        month: 'short',
+        day: 'numeric',
+      });
       context += `- ${dateStr} ${meal.meal_type}: ${meal.meal_name || 'Unnamed meal'}\n`;
     });
     context += `\n`;
   }
 
   if (groceryItems.length > 0) {
-    const unchecked = groceryItems.filter((item) => !item.is_checked);
+    const unchecked = groceryItems.filter((item: any) => !item.is_checked);
     if (unchecked.length > 0) {
       context += `Items on grocery list (need to buy):\n`;
-      unchecked.slice(0, 15).forEach((item) => {
+      unchecked.slice(0, 15).forEach((item: any) => {
         context += `- ${item.name} (${item.quantity} ${item.unit})\n`;
       });
       context += `\n`;
@@ -215,108 +202,60 @@ export interface SendMessageResponse {
   toolCalls?: ToolCall[];
 }
 
-export const sendMessage = async (
-  messages: Message[],
-  contextPrompt: string
+export const sendMessageToClaude = async (
+  messages: Array<{ role: string; content: string }>,
+  contextPrompt: string,
+  apiKey: string
 ): Promise<SendMessageResponse> => {
-  try {
-    // Validate API key
-    console.log('API Key check:', {
-      exists: !!apiKey,
-      length: apiKey?.length,
-      prefix: apiKey?.substring(0, 7),
-      isPlaceholder: apiKey === 'your-anthropic-api-key-here',
-    });
-
-    if (!apiKey || apiKey === 'your-anthropic-api-key-here') {
-      throw new Error(
-        'Anthropic API key not configured. Please set EXPO_PUBLIC_ANTHROPIC_API_KEY in your .env file.'
-      );
-    }
-
-    const formattedMessages = messages.map((msg) => ({
-      role: msg.role,
-      content: msg.content,
-    }));
-
-    console.log('Sending message to Claude API');
-    console.log('Messages count:', formattedMessages.length);
-
-    // Direct API call using fetch (bypassing SDK for React Native compatibility)
-    const requestBody = {
-      model: 'claude-haiku-4-5-20251001',
-      max_tokens: 1024,
-      system: contextPrompt,
-      messages: formattedMessages,
-      tools: tools,
-    };
-
-    console.log('📡 Calling:', ANTHROPIC_API_URL);
-
-    const response = await fetch(ANTHROPIC_API_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-      },
-      body: JSON.stringify(requestBody),
-    });
-
-    console.log('📥 Response status:', response.status, response.statusText);
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      console.log('❌ Error response:', errorData);
-
-      if (response.status === 401) {
-        throw new Error(
-          'Invalid API key. Please check your EXPO_PUBLIC_ANTHROPIC_API_KEY in .env file.'
-        );
-      } else if (response.status === 400) {
-        throw new Error(
-          `Bad request: ${errorData.error?.message || 'Invalid request format'}`
-        );
-      } else {
-        throw new Error(
-          `API error (${response.status}): ${errorData.error?.message || response.statusText}`
-        );
-      }
-    }
-
-    const data = await response.json();
-    console.log('✅ Response received, processing content');
-
-    let textContent = '';
-    const toolCalls: ToolCall[] = [];
-
-    // Process response content
-    for (const content of data.content) {
-      if (content.type === 'text') {
-        textContent += content.text;
-      } else if (content.type === 'tool_use') {
-        toolCalls.push({
-          id: content.id,
-          name: content.name,
-          input: content.input,
-        });
-      }
-    }
-
-    return {
-      text: textContent,
-      toolCalls: toolCalls.length > 0 ? toolCalls : undefined,
-    };
-  } catch (error: any) {
-    console.error('Error sending message to Claude:', error);
-
-    // Network error
-    if (error.message?.includes('network') || error.message?.includes('fetch')) {
-      throw new Error(
-        'Network error. Please check your internet connection and ensure the Anthropic API is accessible.'
-      );
-    }
-
-    throw error;
+  if (!apiKey) {
+    throw new Error('Anthropic API key not configured');
   }
+
+  const requestBody = {
+    model: 'claude-haiku-4-5-20251001',
+    max_tokens: 1024,
+    system: contextPrompt,
+    messages: messages,
+    tools: tools,
+  };
+
+  const response = await fetch(ANTHROPIC_API_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01',
+    },
+    body: JSON.stringify(requestBody),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(
+      `Claude API error (${response.status}): ${errorData.error?.message || response.statusText}`
+    );
+  }
+
+  const data = await response.json();
+
+  let textContent = '';
+  const toolCalls: ToolCall[] = [];
+
+  // Process response content
+  for (const content of data.content) {
+    if (content.type === 'text') {
+      textContent += content.text;
+    } else if (content.type === 'tool_use') {
+      toolCalls.push({
+        id: content.id,
+        name: content.name,
+        input: content.input,
+      });
+    }
+  }
+
+  return {
+    text: textContent,
+    toolCalls: toolCalls.length > 0 ? toolCalls : undefined,
+  };
 };

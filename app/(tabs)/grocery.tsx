@@ -21,7 +21,6 @@ export default function GroceryScreen() {
     createGroceryList,
     deleteGroceryList,
     generateFromMealPlan,
-    loading,
   } = useGroceryStore();
 
   const [refreshing, setRefreshing] = useState(false);
@@ -122,9 +121,7 @@ export default function GroceryScreen() {
 
       <ScrollView
         className="flex-1"
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
         {groceryLists.length === 0 ? (
           <View className="flex-1 items-center justify-center py-12">
@@ -217,9 +214,7 @@ export default function GroceryScreen() {
               <Text className="text-xl font-bold text-neutral-900 dark:text-white">
                 Generate from Meal Plan
               </Text>
-              <TouchableOpacity
-                onPress={() => setGenerateModalVisible(false)}
-              >
+              <TouchableOpacity onPress={() => setGenerateModalVisible(false)}>
                 <FontAwesome name="times" size={24} color="#9CA3AF" />
               </TouchableOpacity>
             </View>
