@@ -41,13 +41,10 @@ serve(async (req) => {
     if (error) {
       if (error.code === 'PGRST116') {
         // Not found
-        return new Response(
-          JSON.stringify({ error: 'Conversation not found' }),
-          {
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-            status: 404,
-          }
-        );
+        return new Response(JSON.stringify({ error: 'Conversation not found' }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 404,
+        });
       }
       throw error;
     }
@@ -64,12 +61,9 @@ serve(async (req) => {
     });
   } catch (error: any) {
     console.error('Error fetching messages:', error);
-    return new Response(
-      JSON.stringify({ error: error.message || 'Internal server error' }),
-      {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: error.message === 'Unauthorized' ? 401 : 500,
-      }
-    );
+    return new Response(JSON.stringify({ error: error.message || 'Internal server error' }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      status: error.message === 'Unauthorized' ? 401 : 500,
+    });
   }
 });

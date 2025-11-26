@@ -49,9 +49,7 @@ export const sendMessage = async (
 /**
  * Get messages for a conversation
  */
-export const getMessages = async (
-  conversationId: string
-): Promise<GetMessagesResponse> => {
+export const getMessages = async (conversationId: string): Promise<GetMessagesResponse> => {
   const { data, error } = await supabase.functions.invoke('get-messages', {
     body: {
       conversationId,

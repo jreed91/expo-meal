@@ -49,9 +49,7 @@ export const usePantryStore = create<PantryState>((set, get) => ({
     try {
       const updatedItem = await pantryApi.updatePantryItem(id, updates);
       set((state) => ({
-        pantryItems: state.pantryItems.map((i) =>
-          i.id === id ? updatedItem : i
-        ),
+        pantryItems: state.pantryItems.map((i) => (i.id === id ? updatedItem : i)),
       }));
     } catch (error) {
       console.error('Error updating pantry item:', error);

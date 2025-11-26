@@ -11,7 +11,6 @@ import {
 import { useMealPlanStore } from '@/store/mealPlanStore';
 import { useRecipeStore } from '@/store/recipeStore';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
-import { Database } from '@/types/database.types';
 
 type MealType = 'breakfast' | 'lunch' | 'dinner' | 'snack';
 
@@ -27,7 +26,6 @@ export default function MealPlannerScreen() {
     getMealsForDate,
     addMealPlan,
     deleteMealPlan,
-    loading,
   } = useMealPlanStore();
 
   const { recipes, fetchRecipes } = useRecipeStore();
@@ -150,9 +148,7 @@ export default function MealPlannerScreen() {
         horizontal
         showsHorizontalScrollIndicator={false}
         className="flex-1"
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
         {weekDates.map((date, dayIndex) => {
           const meals = getMealsForDate(date);
@@ -176,9 +172,7 @@ export default function MealPlannerScreen() {
 
               <ScrollView className="flex-1 p-2">
                 {MEAL_TYPES.map((mealType) => {
-                  const mealsForType = meals.filter(
-                    (m) => m.meal_type === mealType
-                  );
+                  const mealsForType = meals.filter((m) => m.meal_type === mealType);
                   return (
                     <View key={mealType} className="mb-4">
                       <Text className="text-xs uppercase text-neutral-500 dark:text-neutral-400 font-semibold mb-2">
@@ -186,9 +180,7 @@ export default function MealPlannerScreen() {
                       </Text>
                       {mealsForType.length > 0 ? (
                         mealsForType.map((meal) => {
-                          const recipe = recipes.find(
-                            (r) => r.id === meal.recipe_id
-                          );
+                          const recipe = recipes.find((r) => r.id === meal.recipe_id);
                           return (
                             <TouchableOpacity
                               key={meal.id}
@@ -278,9 +270,7 @@ export default function MealPlannerScreen() {
                   <Text className="text-neutral-900 dark:text-white font-medium flex-1">
                     {recipe.title}
                   </Text>
-                  {recipe.is_favorite && (
-                    <FontAwesome name="star" size={16} color="#EAB308" />
-                  )}
+                  {recipe.is_favorite && <FontAwesome name="star" size={16} color="#EAB308" />}
                 </TouchableOpacity>
               ))}
               {recipes.length === 0 && (

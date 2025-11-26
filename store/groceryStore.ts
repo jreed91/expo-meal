@@ -5,8 +5,10 @@ import { supabase } from '@/lib/supabase';
 
 type GroceryList = Database['public']['Tables']['grocery_lists']['Row'];
 type GroceryListItem = Database['public']['Tables']['grocery_list_items']['Row'];
-type GroceryListInsert = Omit<Database['public']['Tables']['grocery_lists']['Insert'], 'user_id'>;
-type GroceryListItemInsert = Omit<Database['public']['Tables']['grocery_list_items']['Insert'], 'list_id'>;
+type GroceryListItemInsert = Omit<
+  Database['public']['Tables']['grocery_list_items']['Insert'],
+  'list_id'
+>;
 
 interface GroceryState {
   groceryLists: GroceryList[];
@@ -14,23 +16,12 @@ interface GroceryState {
   loading: boolean;
   fetchGroceryLists: () => Promise<void>;
   fetchGroceryListItems: (listId: string) => Promise<void>;
-  createGroceryList: (
-    name: string,
-    startDate?: Date,
-    endDate?: Date
-  ) => Promise<GroceryList>;
+  createGroceryList: (name: string, startDate?: Date, endDate?: Date) => Promise<GroceryList>;
   deleteGroceryList: (id: string) => Promise<void>;
-  addItemToList: (
-    listId: string,
-    item: GroceryListItemInsert
-  ) => Promise<void>;
+  addItemToList: (listId: string, item: GroceryListItemInsert) => Promise<void>;
   toggleItemChecked: (listId: string, itemId: string) => Promise<void>;
   deleteItem: (listId: string, itemId: string) => Promise<void>;
-  generateFromMealPlan: (
-    listName: string,
-    startDate: Date,
-    endDate: Date
-  ) => Promise<GroceryList>;
+  generateFromMealPlan: (listName: string, startDate: Date, endDate: Date) => Promise<GroceryList>;
 }
 
 // Helper function to combine similar ingredients
@@ -119,9 +110,7 @@ export const useGroceryStore = create<GroceryState>((set, get) => ({
       set((state) => ({
         groceryLists: state.groceryLists.filter((l) => l.id !== id),
         groceryListItems: Object.fromEntries(
-          Object.entries(state.groceryListItems).filter(
-            ([key]) => key !== id
-          )
+          Object.entries(state.groceryListItems).filter(([key]) => key !== id)
         ),
       }));
     } catch (error) {
@@ -162,9 +151,7 @@ export const useGroceryStore = create<GroceryState>((set, get) => ({
       set((state) => ({
         groceryListItems: {
           ...state.groceryListItems,
-          [listId]: items.map((i) =>
-            i.id === itemId ? updatedItem : i
-          ),
+          [listId]: items.map((i) => (i.id === itemId ? updatedItem : i)),
         },
       }));
     } catch (error) {
@@ -180,9 +167,7 @@ export const useGroceryStore = create<GroceryState>((set, get) => ({
       set((state) => ({
         groceryListItems: {
           ...state.groceryListItems,
-          [listId]: (state.groceryListItems[listId] || []).filter(
-            (i) => i.id !== itemId
-          ),
+          [listId]: (state.groceryListItems[listId] || []).filter((i) => i.id !== itemId),
         },
       }));
     } catch (error) {

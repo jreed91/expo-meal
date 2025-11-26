@@ -60,10 +60,7 @@ export default function ChatScreen() {
       // Messages are automatically updated by the store
     } catch (error: any) {
       console.error('Error sending message:', error);
-      Alert.alert(
-        'Error',
-        error.message || 'Failed to get response from Claude'
-      );
+      Alert.alert('Error', error.message || 'Failed to get response from Claude');
     }
   };
 
@@ -79,20 +76,16 @@ export default function ChatScreen() {
   };
 
   const handleNewChat = () => {
-    Alert.alert(
-      'Start New Chat',
-      'This will clear your current conversation. Continue?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'New Chat',
-          style: 'destructive',
-          onPress: async () => {
-            await clearMessages();
-          },
+    Alert.alert('Start New Chat', 'This will clear your current conversation. Continue?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'New Chat',
+        style: 'destructive',
+        onPress: async () => {
+          await clearMessages();
         },
-      ]
-    );
+      },
+    ]);
   };
 
   const formatTimestamp = (timestamp: string) => {
@@ -138,110 +131,102 @@ export default function ChatScreen() {
           className="flex-1 p-4"
           keyboardShouldPersistTaps="handled"
           keyboardDismissMode="on-drag"
-          onContentSizeChange={() =>
-            scrollViewRef.current?.scrollToEnd({ animated: true })
-          }
+          onContentSizeChange={() => scrollViewRef.current?.scrollToEnd({ animated: true })}
         >
-        {messages.map((message) => (
-          <View
-            key={message.id}
-            className={`mb-4 ${message.role === 'user' ? 'items-end' : 'items-start'}`}
-          >
+          {messages.map((message) => (
             <View
-              className={`max-w-[80%] p-4 rounded-2xl ${
-                message.role === 'user'
-                  ? 'bg-primary-500'
-                  : message.toolCalls && message.toolCalls.length > 0
-                    ? 'bg-success-50 dark:bg-success-900/20 border-2 border-success-500'
-                    : 'bg-white dark:bg-neutral-800'
-              }`}
+              key={message.id}
+              className={`mb-4 ${message.role === 'user' ? 'items-end' : 'items-start'}`}
             >
-              {message.toolCalls && message.toolCalls.length > 0 && (
-                <View className="flex-row items-center mb-2">
-                  <FontAwesome
-                    name="check-circle"
-                    size={16}
-                    color="#22c55e"
-                  />
-                  <Text className="text-success-600 dark:text-success-400 font-semibold ml-2">
-                    Action Performed
-                  </Text>
-                </View>
-              )}
-              <Text
-                className={`${
+              <View
+                className={`max-w-[80%] p-4 rounded-2xl ${
                   message.role === 'user'
-                    ? 'text-white'
-                    : 'text-neutral-900 dark:text-neutral-50'
+                    ? 'bg-primary-500'
+                    : message.toolCalls && message.toolCalls.length > 0
+                      ? 'bg-success-50 dark:bg-success-900/20 border-2 border-success-500'
+                      : 'bg-white dark:bg-neutral-800'
                 }`}
               >
-                {message.content}
+                {message.toolCalls && message.toolCalls.length > 0 && (
+                  <View className="flex-row items-center mb-2">
+                    <FontAwesome name="check-circle" size={16} color="#22c55e" />
+                    <Text className="text-success-600 dark:text-success-400 font-semibold ml-2">
+                      Action Performed
+                    </Text>
+                  </View>
+                )}
+                <Text
+                  className={`${
+                    message.role === 'user' ? 'text-white' : 'text-neutral-900 dark:text-neutral-50'
+                  }`}
+                >
+                  {message.content}
+                </Text>
+              </View>
+              <Text className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">
+                {formatTimestamp(message.timestamp)}
               </Text>
             </View>
-            <Text className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">
-              {formatTimestamp(message.timestamp)}
-            </Text>
-          </View>
-        ))}
+          ))}
 
-        {loading && (
-          <View className="items-start mb-4">
-            <View className="bg-white dark:bg-neutral-800 p-4 rounded-2xl">
-              <ActivityIndicator size="small" color="#FF7A55" />
+          {loading && (
+            <View className="items-start mb-4">
+              <View className="bg-white dark:bg-neutral-800 p-4 rounded-2xl">
+                <ActivityIndicator size="small" color="#FF7A55" />
+              </View>
             </View>
-          </View>
-        )}
+          )}
 
-        {messages.length === 1 && (
-          <View className="mt-4">
-            <Text className="text-sm font-semibold text-neutral-700 dark:text-neutral-300 mb-3">
-              Try asking:
-            </Text>
-            {suggestedPrompts.map((prompt, index) => (
-              <TouchableOpacity
-                key={index}
-                className="bg-white dark:bg-neutral-800 p-4 rounded-2xl mb-3 border border-cream-300 dark:border-neutral-700 active:bg-cream-200 dark:active:bg-neutral-700"
-                onPress={() => handleSuggestedPrompt(prompt)}
-              >
-                <Text className="text-neutral-700 dark:text-neutral-300">
-                  {prompt}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        )}
-      </ScrollView>
+          {messages.length === 1 && (
+            <View className="mt-4">
+              <Text className="text-sm font-semibold text-neutral-700 dark:text-neutral-300 mb-3">
+                Try asking:
+              </Text>
+              {suggestedPrompts.map((prompt, index) => (
+                <TouchableOpacity
+                  key={index}
+                  className="bg-white dark:bg-neutral-800 p-4 rounded-2xl mb-3 border border-cream-300 dark:border-neutral-700 active:bg-cream-200 dark:active:bg-neutral-700"
+                  onPress={() => handleSuggestedPrompt(prompt)}
+                >
+                  <Text className="text-neutral-700 dark:text-neutral-300">{prompt}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          )}
+        </ScrollView>
 
-      <View className="p-4 border-t border-cream-300 dark:border-neutral-800 bg-cream-50 dark:bg-neutral-900">
-        <View className="flex-row items-center gap-2">
-          <TextInput
-            className="flex-1 px-4 py-3 border border-neutral-300 dark:border-neutral-700 rounded-2xl bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white"
-            placeholder="Ask me anything about cooking..."
-            placeholderTextColor="#A8A29E"
-            value={inputText}
-            onChangeText={setInputText}
-            maxLength={500}
-            editable={!loading}
-            returnKeyType="send"
-            blurOnSubmit={false}
-            onSubmitEditing={handleSend}
-            enablesReturnKeyAutomatically
-          />
-          <TouchableOpacity
-            className={`p-4 rounded-2xl ${
-              inputText.trim() && !loading ? 'bg-primary-500 active:bg-primary-600' : 'bg-neutral-300 dark:bg-neutral-700'
-            }`}
-            onPress={handleSend}
-            disabled={!inputText.trim() || loading}
-          >
-            {loading ? (
-              <ActivityIndicator size="small" color="white" />
-            ) : (
-              <FontAwesome name="send" size={20} color="white" />
-            )}
-          </TouchableOpacity>
+        <View className="p-4 border-t border-cream-300 dark:border-neutral-800 bg-cream-50 dark:bg-neutral-900">
+          <View className="flex-row items-center gap-2">
+            <TextInput
+              className="flex-1 px-4 py-3 border border-neutral-300 dark:border-neutral-700 rounded-2xl bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white"
+              placeholder="Ask me anything about cooking..."
+              placeholderTextColor="#A8A29E"
+              value={inputText}
+              onChangeText={setInputText}
+              maxLength={500}
+              editable={!loading}
+              returnKeyType="send"
+              blurOnSubmit={false}
+              onSubmitEditing={handleSend}
+              enablesReturnKeyAutomatically
+            />
+            <TouchableOpacity
+              className={`p-4 rounded-2xl ${
+                inputText.trim() && !loading
+                  ? 'bg-primary-500 active:bg-primary-600'
+                  : 'bg-neutral-300 dark:bg-neutral-700'
+              }`}
+              onPress={handleSend}
+              disabled={!inputText.trim() || loading}
+            >
+              {loading ? (
+                <ActivityIndicator size="small" color="white" />
+              ) : (
+                <FontAwesome name="send" size={20} color="white" />
+              )}
+            </TouchableOpacity>
+          </View>
         </View>
-      </View>
       </KeyboardAvoidingView>
     </TouchableWithoutFeedback>
   );

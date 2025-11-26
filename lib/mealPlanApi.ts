@@ -55,7 +55,7 @@ export const updateMealPlan = async (id: string, updates: MealPlanUpdate): Promi
 };
 
 export const deleteMealPlan = async (id: string): Promise<void> => {
-  const { data, error } = await supabase.functions.invoke('meal-plans', {
+  const { error } = await supabase.functions.invoke('meal-plans', {
     method: 'DELETE',
     body: { id },
   });

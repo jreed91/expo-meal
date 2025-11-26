@@ -16,7 +16,10 @@ export const fetchProfile = async (): Promise<Profile> => {
   return data.profile;
 };
 
-export const updateProfile = async (updates: { full_name?: string; allergies?: string[] }): Promise<Profile> => {
+export const updateProfile = async (updates: {
+  full_name?: string;
+  allergies?: string[];
+}): Promise<Profile> => {
   const { data, error } = await supabase.functions.invoke('profiles', {
     method: 'PUT',
     body: updates,

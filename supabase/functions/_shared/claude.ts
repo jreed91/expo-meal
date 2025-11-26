@@ -53,8 +53,7 @@ export const tools = [
         },
         category: {
           type: 'string',
-          description:
-            'Optional category (e.g., dairy, meat, vegetables, grains)',
+          description: 'Optional category (e.g., dairy, meat, vegetables, grains)',
         },
         expiry_date: {
           type: 'string',
@@ -86,8 +85,7 @@ export const tools = [
         },
         category: {
           type: 'string',
-          description:
-            'Optional category (e.g., dairy, meat, vegetables, grains, bakery)',
+          description: 'Optional category (e.g., dairy, meat, vegetables, grains, bakery)',
         },
       },
       required: ['name'],
@@ -110,8 +108,7 @@ export const tools = [
         action: {
           type: 'string',
           enum: ['replace', 'add', 'remove'],
-          description:
-            'Whether to replace all allergies, add new ones, or remove specific ones',
+          description: 'Whether to replace all allergies, add new ones, or remove specific ones',
         },
       },
       required: ['allergies', 'action'],

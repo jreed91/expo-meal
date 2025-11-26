@@ -1,11 +1,5 @@
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  Modal,
-} from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 
 // Import the existing screens
@@ -125,7 +119,8 @@ export default function FoodManagementScreen() {
                 Quick Tip
               </Text>
               <Text className="text-sm text-primary-700 dark:text-primary-300">
-                Use the Chat tab to ask Claude for recipe suggestions, meal plans, or cooking tips based on your pantry items!
+                Use the Chat tab to ask Claude for recipe suggestions, meal plans, or cooking tips
+                based on your pantry items!
               </Text>
             </View>
           </View>

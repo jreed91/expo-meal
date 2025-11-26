@@ -38,7 +38,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
 
       set({
         messages,
-        currentConversationId: response.conversationId
+        currentConversationId: response.conversationId,
       });
     } catch (error) {
       console.error('Error loading messages:', error);
@@ -50,7 +50,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
   },
 
   sendMessage: async (message: string): Promise<ChatMessage> => {
-    const { currentConversationId, messages } = get();
+    const { currentConversationId } = get();
 
     try {
       set({ loading: true });
@@ -65,7 +65,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
 
       set({
         messages: updatedMessages.messages,
-        currentConversationId: response.conversationId
+        currentConversationId: response.conversationId,
       });
 
       return response.message;

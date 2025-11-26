@@ -37,7 +37,10 @@ export const createGroceryList = async (list: GroceryListInsert): Promise<Grocer
   return data.list;
 };
 
-export const updateGroceryList = async (id: string, updates: GroceryListUpdate): Promise<GroceryList> => {
+export const updateGroceryList = async (
+  id: string,
+  updates: GroceryListUpdate
+): Promise<GroceryList> => {
   const { data, error } = await supabase.functions.invoke('grocery-lists', {
     method: 'PUT',
     body: { id, ...updates },
@@ -52,7 +55,7 @@ export const updateGroceryList = async (id: string, updates: GroceryListUpdate):
 };
 
 export const deleteGroceryList = async (id: string): Promise<void> => {
-  const { data, error } = await supabase.functions.invoke('grocery-lists', {
+  const { error } = await supabase.functions.invoke('grocery-lists', {
     method: 'DELETE',
     body: { id },
   });
@@ -65,18 +68,7 @@ export const deleteGroceryList = async (id: string): Promise<void> => {
 
 // Grocery List Items
 export const fetchGroceryListItems = async (listId: string): Promise<GroceryListItem[]> => {
-  const { data, error } = await supabase.functions.invoke('grocery-lists', {
-    method: 'GET',
-    body: null,
-  });
-
-  if (error) {
-    console.error('Error fetching grocery list items:', error);
-    throw new Error(error.message || 'Failed to fetch grocery list items');
-  }
-
-  // The function will filter by listId via query params
-  // For now, we'll use a different approach
+  // Use direct fetch with query params for items
   const url = new URL(`${supabase.supabaseUrl}/functions/v1/grocery-lists`);
   url.searchParams.set('action', 'items');
   url.searchParams.set('listId', listId);
@@ -118,7 +110,10 @@ export const addGroceryListItem = async (item: GroceryListItemInsert): Promise<G
   return result.item;
 };
 
-export const updateGroceryListItem = async (id: string, updates: GroceryListItemUpdate): Promise<GroceryListItem> => {
+export const updateGroceryListItem = async (
+  id: string,
+  updates: GroceryListItemUpdate
+): Promise<GroceryListItem> => {
   const url = new URL(`${supabase.supabaseUrl}/functions/v1/grocery-lists`);
   url.searchParams.set('action', 'items');
 

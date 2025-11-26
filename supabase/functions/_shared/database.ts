@@ -29,11 +29,7 @@ export const getUserId = async (supabase: SupabaseClient): Promise<string> => {
 
 export const getUserContext = async (supabase: SupabaseClient, userId: string) => {
   // Fetch user profile with allergies
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('id', userId)
-    .single();
+  const { data: profile } = await supabase.from('profiles').select('*').eq('id', userId).single();
 
   // Fetch recipes
   const { data: recipes } = await supabase
@@ -99,15 +95,13 @@ export const executeTool = async (
     case 'add_meal_plan': {
       const { date, meal_type, meal_name, recipe_id } = toolCall.input;
 
-      const { error } = await supabase
-        .from('meal_plans')
-        .insert({
-          user_id: userId,
-          date,
-          meal_type,
-          meal_name,
-          recipe_id: recipe_id || null,
-        });
+      const { error } = await supabase.from('meal_plans').insert({
+        user_id: userId,
+        date,
+        meal_type,
+        meal_name,
+        recipe_id: recipe_id || null,
+      });
 
       if (error) throw error;
       return `Successfully added ${meal_name} to ${meal_type} on ${date}`;
@@ -116,16 +110,14 @@ export const executeTool = async (
     case 'add_pantry_item': {
       const { name, quantity, unit, category, expiry_date } = toolCall.input;
 
-      const { error } = await supabase
-        .from('pantry_items')
-        .insert({
-          user_id: userId,
-          name,
-          quantity,
-          unit,
-          category: category || null,
-          expiry_date: expiry_date || null,
-        });
+      const { error } = await supabase.from('pantry_items').insert({
+        user_id: userId,
+        name,
+        quantity,
+        unit,
+        category: category || null,
+        expiry_date: expiry_date || null,
+      });
 
       if (error) throw error;
       return `Successfully added ${quantity} ${unit} of ${name} to pantry`;
@@ -168,16 +160,14 @@ export const executeTool = async (
       }
 
       // Add item to the list
-      const { error } = await supabase
-        .from('grocery_list_items')
-        .insert({
-          list_id: listId,
-          name,
-          quantity: finalQuantity,
-          unit: finalUnit,
-          category: category || null,
-          is_checked: false,
-        });
+      const { error } = await supabase.from('grocery_list_items').insert({
+        list_id: listId,
+        name,
+        quantity: finalQuantity,
+        unit: finalUnit,
+        category: category || null,
+        is_checked: false,
+      });
 
       if (error) throw error;
       return `Successfully added ${finalQuantity} ${finalUnit}${finalQuantity !== 1 ? 's' : ''} of ${name} to grocery list`;
@@ -202,9 +192,7 @@ export const executeTool = async (
           (v: string, i: number, a: string[]) => a.indexOf(v) === i
         ); // Remove duplicates
       } else if (action === 'remove') {
-        updatedAllergies = updatedAllergies.filter(
-          (a: string) => !allergies.includes(a)
-        );
+        updatedAllergies = updatedAllergies.filter((a: string) => !allergies.includes(a));
       }
 
       const { error } = await supabase

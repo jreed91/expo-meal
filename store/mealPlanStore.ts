@@ -64,9 +64,7 @@ export const useMealPlanStore = create<MealPlanState>((set, get) => ({
     try {
       const updatedMealPlan = await mealPlanApi.updateMealPlan(id, updates);
       set((state) => ({
-        mealPlans: state.mealPlans.map((m) =>
-          m.id === id ? updatedMealPlan : m
-        ),
+        mealPlans: state.mealPlans.map((m) => (m.id === id ? updatedMealPlan : m)),
       }));
     } catch (error) {
       console.error('Error updating meal plan:', error);

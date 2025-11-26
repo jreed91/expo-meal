@@ -39,11 +39,9 @@ export default function SignUpScreen() {
 
     try {
       await signUp(email, password, fullName);
-      Alert.alert(
-        'Success',
-        'Account created! Please check your email to verify your account.',
-        [{ text: 'OK', onPress: () => router.replace('/(tabs)') }]
-      );
+      Alert.alert('Success', 'Account created! Please check your email to verify your account.', [
+        { text: 'OK', onPress: () => router.replace('/(tabs)') },
+      ]);
     } catch (error: any) {
       Alert.alert('Error', error.message || 'Failed to create account');
     }

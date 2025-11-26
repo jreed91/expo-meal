@@ -13,14 +13,8 @@ import { usePantryStore } from '@/store/pantryStore';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 
 export default function PantryScreen() {
-  const {
-    pantryItems,
-    fetchPantryItems,
-    addPantryItem,
-    deletePantryItem,
-    getExpiringItems,
-    loading,
-  } = usePantryStore();
+  const { pantryItems, fetchPantryItems, addPantryItem, deletePantryItem, getExpiringItems } =
+    usePantryStore();
 
   const [refreshing, setRefreshing] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
@@ -107,17 +101,14 @@ export default function PantryScreen() {
   return (
     <View className="flex-1 bg-cream-100 dark:bg-neutral-900">
       <View className="p-4 border-b border-cream-300 dark:border-neutral-800">
-        <Text className="text-2xl font-bold text-neutral-900 dark:text-white mb-4">
-          Pantry
-        </Text>
+        <Text className="text-2xl font-bold text-neutral-900 dark:text-white mb-4">Pantry</Text>
 
         {expiringItems.length > 0 && (
           <View className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-3 mb-4">
             <View className="flex-row items-center">
               <FontAwesome name="warning" size={16} color="#EAB308" />
               <Text className="text-yellow-800 dark:text-yellow-200 font-semibold ml-2">
-                {expiringItems.length} item{expiringItems.length !== 1 ? 's' : ''}{' '}
-                expiring soon
+                {expiringItems.length} item{expiringItems.length !== 1 ? 's' : ''} expiring soon
               </Text>
             </View>
           </View>
@@ -133,9 +124,7 @@ export default function PantryScreen() {
 
       <ScrollView
         className="flex-1"
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
         {pantryItems.length === 0 ? (
           <View className="flex-1 items-center justify-center py-12">
@@ -175,9 +164,7 @@ export default function PantryScreen() {
                         </Text>
                       )}
                     </View>
-                    <TouchableOpacity
-                      onPress={() => handleDeleteItem(item.id, item.name)}
-                    >
+                    <TouchableOpacity onPress={() => handleDeleteItem(item.id, item.name)}>
                       <FontAwesome name="trash-o" size={20} color="#EF4444" />
                     </TouchableOpacity>
                   </View>
@@ -187,9 +174,7 @@ export default function PantryScreen() {
                       <FontAwesome
                         name="calendar"
                         size={14}
-                        color={
-                          expired ? '#EF4444' : expiring ? '#EAB308' : '#9CA3AF'
-                        }
+                        color={expired ? '#EF4444' : expiring ? '#EAB308' : '#9CA3AF'}
                       />
                       <Text
                         className={`text-sm ml-2 ${
@@ -201,10 +186,11 @@ export default function PantryScreen() {
                         }`}
                       >
                         Expires{' '}
-                        {new Date(item.expiry_date).toLocaleDateString(
-                          undefined,
-                          { month: 'short', day: 'numeric', year: 'numeric' }
-                        )}
+                        {new Date(item.expiry_date).toLocaleDateString(undefined, {
+                          month: 'short',
+                          day: 'numeric',
+                          year: 'numeric',
+                        })}
                       </Text>
                     </View>
                   )}

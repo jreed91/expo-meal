@@ -48,14 +48,16 @@ serve(async (req) => {
 
       const { data, error } = await supabase
         .from('pantry_items')
-        .insert([{
-          user_id: userId,
-          name,
-          quantity,
-          unit,
-          category: category || null,
-          expiry_date: expiry_date || null,
-        }])
+        .insert([
+          {
+            user_id: userId,
+            name,
+            quantity,
+            unit,
+            category: category || null,
+            expiry_date: expiry_date || null,
+          },
+        ])
         .select()
         .single();
 
@@ -115,21 +117,15 @@ serve(async (req) => {
       });
     }
 
-    return new Response(
-      JSON.stringify({ error: 'Method not allowed' }),
-      {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 405,
-      }
-    );
+    return new Response(JSON.stringify({ error: 'Method not allowed' }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      status: 405,
+    });
   } catch (error: any) {
     console.error('Error in pantry function:', error);
-    return new Response(
-      JSON.stringify({ error: error.message || 'Internal server error' }),
-      {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: error.message === 'Unauthorized' ? 401 : 500,
-      }
-    );
+    return new Response(JSON.stringify({ error: error.message || 'Internal server error' }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      status: error.message === 'Unauthorized' ? 401 : 500,
+    });
   }
 });

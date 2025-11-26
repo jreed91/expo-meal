@@ -27,10 +27,7 @@ serve(async (req) => {
       const startDate = url.searchParams.get('startDate');
       const endDate = url.searchParams.get('endDate');
 
-      let query = supabase
-        .from('meal_plans')
-        .select('*')
-        .eq('user_id', userId);
+      let query = supabase.from('meal_plans').select('*').eq('user_id', userId);
 
       if (startDate) {
         query = query.gte('date', startDate);
@@ -60,14 +57,16 @@ serve(async (req) => {
 
       const { data, error } = await supabase
         .from('meal_plans')
-        .insert([{
-          user_id: userId,
-          date,
-          meal_type,
-          meal_name,
-          recipe_id: recipe_id || null,
-          notes: notes || null,
-        }])
+        .insert([
+          {
+            user_id: userId,
+            date,
+            meal_type,
+            meal_name,
+            recipe_id: recipe_id || null,
+            notes: notes || null,
+          },
+        ])
         .select()
         .single();
 
@@ -127,21 +126,15 @@ serve(async (req) => {
       });
     }
 
-    return new Response(
-      JSON.stringify({ error: 'Method not allowed' }),
-      {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 405,
-      }
-    );
+    return new Response(JSON.stringify({ error: 'Method not allowed' }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      status: 405,
+    });
   } catch (error: any) {
     console.error('Error in meal-plans function:', error);
-    return new Response(
-      JSON.stringify({ error: error.message || 'Internal server error' }),
-      {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: error.message === 'Unauthorized' ? 401 : 500,
-      }
-    );
+    return new Response(JSON.stringify({ error: error.message || 'Internal server error' }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      status: error.message === 'Unauthorized' ? 401 : 500,
+    });
   }
 });

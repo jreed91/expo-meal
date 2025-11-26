@@ -32,7 +32,10 @@ export const addPantryItem = async (item: PantryItemInsert): Promise<PantryItem>
   return data.item;
 };
 
-export const updatePantryItem = async (id: string, updates: PantryItemUpdate): Promise<PantryItem> => {
+export const updatePantryItem = async (
+  id: string,
+  updates: PantryItemUpdate
+): Promise<PantryItem> => {
   const { data, error } = await supabase.functions.invoke('pantry', {
     method: 'PUT',
     body: { id, ...updates },
@@ -47,7 +50,7 @@ export const updatePantryItem = async (id: string, updates: PantryItemUpdate): P
 };
 
 export const deletePantryItem = async (id: string): Promise<void> => {
-  const { data, error } = await supabase.functions.invoke('pantry', {
+  const { error } = await supabase.functions.invoke('pantry', {
     method: 'DELETE',
     body: { id },
   });

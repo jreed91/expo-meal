@@ -47,7 +47,7 @@ export const updateRecipe = async (id: string, updates: RecipeUpdate): Promise<R
 };
 
 export const deleteRecipe = async (id: string): Promise<void> => {
-  const { data, error } = await supabase.functions.invoke('recipes', {
+  const { error } = await supabase.functions.invoke('recipes', {
     method: 'DELETE',
     body: { id },
   });

@@ -1,7 +1,17 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
-import { createSupabaseClient, getUserId, getUserContext, executeTool } from '../_shared/database.ts';
+import {
+  createSupabaseClient,
+  getUserId,
+  getUserContext,
+  executeTool,
+} from '../_shared/database.ts';
 import { sendMessageToClaude, buildContextPrompt } from '../_shared/claude.ts';
-import { ChatMessage, SendMessageRequest, SendMessageResponse, ToolCall } from '../_shared/types.ts';
+import {
+  ChatMessage,
+  SendMessageRequest,
+  SendMessageResponse,
+  ToolCall,
+} from '../_shared/types.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -67,10 +77,7 @@ serve(async (req) => {
     );
 
     // Build conversation history for Claude
-    const conversationHistory = [
-      ...existingMessages,
-      userMessage,
-    ].map((msg) => ({
+    const conversationHistory = [...existingMessages, userMessage].map((msg) => ({
       role: msg.role,
       content: msg.content,
     }));
@@ -82,11 +89,7 @@ serve(async (req) => {
     }
 
     // Send message to Claude
-    const claudeResponse = await sendMessageToClaude(
-      conversationHistory,
-      contextPrompt,
-      apiKey
-    );
+    const claudeResponse = await sendMessageToClaude(conversationHistory, contextPrompt, apiKey);
 
     // Execute any tool calls
     let finalContent = claudeResponse.text;
@@ -132,17 +135,11 @@ serve(async (req) => {
     };
 
     // Update conversation in database
-    const updatedMessages = [
-      ...existingMessages,
-      userMessage,
-      assistantMessage,
-    ];
+    const updatedMessages = [...existingMessages, userMessage, assistantMessage];
 
     const conversationData = {
       user_id: userId,
-      title: existingMessages.length === 0
-        ? message.substring(0, 100)
-        : undefined, // Only set title for new conversations
+      title: existingMessages.length === 0 ? message.substring(0, 100) : undefined, // Only set title for new conversations
       messages: updatedMessages,
       updated_at: new Date().toISOString(),
     };
@@ -180,12 +177,9 @@ serve(async (req) => {
     });
   } catch (error: any) {
     console.error('Error processing chat:', error);
-    return new Response(
-      JSON.stringify({ error: error.message || 'Internal server error' }),
-      {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: error.message === 'Unauthorized' ? 401 : 500,
-      }
-    );
+    return new Response(JSON.stringify({ error: error.message || 'Internal server error' }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      status: error.message === 'Unauthorized' ? 401 : 500,
+    });
   }
 });

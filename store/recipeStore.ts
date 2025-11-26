@@ -56,9 +56,7 @@ export const useRecipeStore = create<RecipeState>((set, get) => ({
     try {
       const updatedRecipe = await recipeApi.updateRecipe(id, updates);
       set((state) => ({
-        recipes: state.recipes.map((r) =>
-          r.id === id ? updatedRecipe : r
-        ),
+        recipes: state.recipes.map((r) => (r.id === id ? updatedRecipe : r)),
       }));
     } catch (error) {
       console.error('Error updating recipe:', error);

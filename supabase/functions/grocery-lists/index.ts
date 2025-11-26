@@ -22,7 +22,6 @@ serve(async (req) => {
     const userId = await getUserId(supabase);
 
     const url = new URL(req.url);
-    const path = url.pathname.split('/').filter(Boolean);
     const action = url.searchParams.get('action'); // 'lists' or 'items'
     const listId = url.searchParams.get('listId');
 
@@ -97,15 +96,17 @@ serve(async (req) => {
 
         const { data, error } = await supabase
           .from('grocery_list_items')
-          .insert([{
-            list_id,
-            name,
-            quantity,
-            unit,
-            category: category || null,
-            is_checked: is_checked || false,
-            recipe_id: recipe_id || null,
-          }])
+          .insert([
+            {
+              list_id,
+              name,
+              quantity,
+              unit,
+              category: category || null,
+              is_checked: is_checked || false,
+              recipe_id: recipe_id || null,
+            },
+          ])
           .select()
           .single();
 
@@ -125,10 +126,12 @@ serve(async (req) => {
 
         const { data, error } = await supabase
           .from('grocery_lists')
-          .insert([{
-            user_id: userId,
-            name,
-          }])
+          .insert([
+            {
+              user_id: userId,
+              name,
+            },
+          ])
           .select()
           .single();
 
@@ -195,10 +198,7 @@ serve(async (req) => {
 
       if (action === 'items') {
         // Delete grocery list item
-        const { error } = await supabase
-          .from('grocery_list_items')
-          .delete()
-          .eq('id', id);
+        const { error } = await supabase.from('grocery_list_items').delete().eq('id', id);
 
         if (error) throw error;
       } else {
@@ -218,21 +218,16 @@ serve(async (req) => {
       });
     }
 
-    return new Response(
-      JSON.stringify({ error: 'Method not allowed' }),
-      {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 405,
-      }
-    );
+    return new Response(JSON.stringify({ error: 'Method not allowed' }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      status: 405,
+    });
   } catch (error: any) {
     console.error('Error in grocery-lists function:', error);
-    return new Response(
-      JSON.stringify({ error: error.message || 'Internal server error' }),
-      {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: error.message === 'Unauthorized' || error.message.includes('unauthorized') ? 401 : 500,
-      }
-    );
+    return new Response(JSON.stringify({ error: error.message || 'Internal server error' }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      status:
+        error.message === 'Unauthorized' || error.message.includes('unauthorized') ? 401 : 500,
+    });
   }
 });

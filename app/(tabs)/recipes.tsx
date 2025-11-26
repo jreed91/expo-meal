@@ -55,17 +55,11 @@ export default function RecipesScreen() {
           </View>
           <TouchableOpacity
             className={`p-2 rounded-lg ${
-              favoriteFilter
-                ? 'bg-warning-500'
-                : 'bg-gray-100 dark:bg-neutral-800'
+              favoriteFilter ? 'bg-warning-500' : 'bg-gray-100 dark:bg-neutral-800'
             }`}
             onPress={() => setFavoriteFilter(!favoriteFilter)}
           >
-            <FontAwesome
-              name="star"
-              size={20}
-              color={favoriteFilter ? 'white' : '#9CA3AF'}
-            />
+            <FontAwesome name="star" size={20} color={favoriteFilter ? 'white' : '#9CA3AF'} />
           </TouchableOpacity>
         </View>
 
@@ -79,9 +73,7 @@ export default function RecipesScreen() {
 
       <ScrollView
         className="flex-1"
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
         {loading && !refreshing ? (
           <View className="flex-1 items-center justify-center py-12">
@@ -156,9 +148,7 @@ export default function RecipesScreen() {
                         key={index}
                         className="bg-blue-100 dark:bg-blue-900 px-2 py-1 rounded mr-2 mb-1"
                       >
-                        <Text className="text-xs text-blue-800 dark:text-blue-200">
-                          {tag}
-                        </Text>
+                        <Text className="text-xs text-blue-800 dark:text-blue-200">{tag}</Text>
                       </View>
                     ))}
                   </View>

@@ -59,19 +59,21 @@ serve(async (req) => {
 
       const { data, error } = await supabase
         .from('recipes')
-        .insert([{
-          user_id: userId,
-          title,
-          ingredients,
-          instructions,
-          servings: servings || null,
-          prep_time: prep_time || null,
-          cook_time: cook_time || null,
-          image_url: image_url || null,
-          tags: tags || [],
-          is_favorite: is_favorite || false,
-          source: source || null,
-        }])
+        .insert([
+          {
+            user_id: userId,
+            title,
+            ingredients,
+            instructions,
+            servings: servings || null,
+            prep_time: prep_time || null,
+            cook_time: cook_time || null,
+            image_url: image_url || null,
+            tags: tags || [],
+            is_favorite: is_favorite || false,
+            source: source || null,
+          },
+        ])
         .select()
         .single();
 
@@ -117,11 +119,7 @@ serve(async (req) => {
         throw new Error('Missing required field: id');
       }
 
-      const { error } = await supabase
-        .from('recipes')
-        .delete()
-        .eq('id', id)
-        .eq('user_id', userId);
+      const { error } = await supabase.from('recipes').delete().eq('id', id).eq('user_id', userId);
 
       if (error) throw error;
 
@@ -131,21 +129,15 @@ serve(async (req) => {
       });
     }
 
-    return new Response(
-      JSON.stringify({ error: 'Method not allowed' }),
-      {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 405,
-      }
-    );
+    return new Response(JSON.stringify({ error: 'Method not allowed' }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      status: 405,
+    });
   } catch (error: any) {
     console.error('Error in recipes function:', error);
-    return new Response(
-      JSON.stringify({ error: error.message || 'Internal server error' }),
-      {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: error.message === 'Unauthorized' ? 401 : 500,
-      }
-    );
+    return new Response(JSON.stringify({ error: error.message || 'Internal server error' }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      status: error.message === 'Unauthorized' ? 401 : 500,
+    });
   }
 });
