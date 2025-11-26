@@ -54,8 +54,8 @@ export default function RecipeDetailScreen() {
 
   if (!recipe) {
     return (
-      <View className="flex-1 items-center justify-center bg-white dark:bg-gray-900">
-        <ActivityIndicator size="large" color="#3B82F6" />
+      <View className="flex-1 items-center justify-center bg-cream-100 dark:bg-neutral-900">
+        <ActivityIndicator size="large" color="#FF7A55" />
       </View>
     );
   }
@@ -63,10 +63,10 @@ export default function RecipeDetailScreen() {
   const ingredients = recipe.ingredients as RecipeIngredient[];
 
   return (
-    <View className="flex-1 bg-white dark:bg-gray-900">
-      <View className="flex-row items-center justify-between p-4 border-b border-gray-200 dark:border-gray-800">
+    <View className="flex-1 bg-cream-100 dark:bg-neutral-900">
+      <View className="flex-row items-center justify-between p-4 border-b border-cream-300 dark:border-neutral-800">
         <TouchableOpacity onPress={() => router.back()}>
-          <FontAwesome name="arrow-left" size={24} color="#3B82F6" />
+          <FontAwesome name="arrow-left" size={24} color="#FF7A55" />
         </TouchableOpacity>
         <View className="flex-row space-x-4">
           <TouchableOpacity
@@ -87,7 +87,7 @@ export default function RecipeDetailScreen() {
 
       <ScrollView className="flex-1">
         <View className="p-6">
-          <Text className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
+          <Text className="text-3xl font-bold text-neutral-900 dark:text-white mb-4">
             {recipe.title}
           </Text>
 
@@ -95,7 +95,7 @@ export default function RecipeDetailScreen() {
             {recipe.servings && (
               <View className="flex-row items-center mr-4 mb-2">
                 <FontAwesome name="users" size={16} color="#9CA3AF" />
-                <Text className="text-gray-600 dark:text-gray-400 ml-2">
+                <Text className="text-neutral-600 dark:text-neutral-400 ml-2">
                   {recipe.servings} servings
                 </Text>
               </View>
@@ -103,7 +103,7 @@ export default function RecipeDetailScreen() {
             {recipe.prep_time && (
               <View className="flex-row items-center mr-4 mb-2">
                 <FontAwesome name="clock-o" size={16} color="#9CA3AF" />
-                <Text className="text-gray-600 dark:text-gray-400 ml-2">
+                <Text className="text-neutral-600 dark:text-neutral-400 ml-2">
                   {recipe.prep_time}m prep
                 </Text>
               </View>
@@ -111,7 +111,7 @@ export default function RecipeDetailScreen() {
             {recipe.cook_time && (
               <View className="flex-row items-center mr-4 mb-2">
                 <FontAwesome name="fire" size={16} color="#9CA3AF" />
-                <Text className="text-gray-600 dark:text-gray-400 ml-2">
+                <Text className="text-neutral-600 dark:text-neutral-400 ml-2">
                   {recipe.cook_time}m cook
                 </Text>
               </View>
@@ -120,7 +120,7 @@ export default function RecipeDetailScreen() {
 
           {recipe.source && (
             <View className="mb-4">
-              <Text className="text-sm text-gray-500 dark:text-gray-400">
+              <Text className="text-sm text-neutral-500 dark:text-neutral-400">
                 Source: {recipe.source}
               </Text>
             </View>
@@ -142,17 +142,17 @@ export default function RecipeDetailScreen() {
           )}
 
           <View className="mb-6">
-            <Text className="text-xl font-semibold text-gray-900 dark:text-white mb-3">
+            <Text className="text-xl font-semibold text-neutral-900 dark:text-white mb-3">
               Ingredients
             </Text>
-            <View className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
+            <View className="bg-cream-50 dark:bg-neutral-800 rounded-lg p-4">
               {ingredients.map((ingredient, index) => (
                 <View
                   key={index}
-                  className="flex-row items-center py-2 border-b border-gray-200 dark:border-gray-700 last:border-b-0"
+                  className="flex-row items-center py-2 border-b border-cream-300 dark:border-neutral-700 last:border-b-0"
                 >
-                  <View className="w-2 h-2 bg-blue-600 rounded-full mr-3" />
-                  <Text className="text-gray-900 dark:text-white flex-1">
+                  <View className="w-2 h-2 bg-primary-500 rounded-full mr-3" />
+                  <Text className="text-neutral-900 dark:text-white flex-1">
                     {ingredient.quantity} {ingredient.unit} {ingredient.name}
                   </Text>
                 </View>
@@ -161,11 +161,11 @@ export default function RecipeDetailScreen() {
           </View>
 
           <View className="mb-6">
-            <Text className="text-xl font-semibold text-gray-900 dark:text-white mb-3">
+            <Text className="text-xl font-semibold text-neutral-900 dark:text-white mb-3">
               Instructions
             </Text>
-            <View className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
-              <Text className="text-gray-900 dark:text-white leading-6">
+            <View className="bg-cream-50 dark:bg-neutral-800 rounded-lg p-4">
+              <Text className="text-neutral-900 dark:text-white leading-6">
                 {recipe.instructions}
               </Text>
             </View>

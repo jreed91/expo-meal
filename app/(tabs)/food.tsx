@@ -25,28 +25,28 @@ export default function FoodManagementScreen() {
       title: 'Meal Planner',
       description: 'Plan your weekly meals',
       icon: 'calendar' as const,
-      color: 'bg-blue-500',
+      color: 'bg-primary-500',
     },
     {
       id: 'recipes' as FoodSection,
       title: 'Recipes',
       description: 'Browse and manage recipes',
       icon: 'book' as const,
-      color: 'bg-green-500',
+      color: 'bg-success-500',
     },
     {
       id: 'grocery' as FoodSection,
       title: 'Grocery Lists',
       description: 'Create shopping lists',
       icon: 'shopping-cart' as const,
-      color: 'bg-orange-500',
+      color: 'bg-primary-400',
     },
     {
       id: 'pantry' as FoodSection,
       title: 'Pantry',
       description: 'Track your ingredients',
       icon: 'archive' as const,
-      color: 'bg-purple-500',
+      color: 'bg-primary-600',
     },
   ];
 
@@ -68,13 +68,13 @@ export default function FoodManagementScreen() {
   if (currentSection !== 'menu') {
     return (
       <View className="flex-1">
-        <View className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 px-4 py-3">
+        <View className="bg-cream-100 dark:bg-neutral-900 border-b border-cream-300 dark:border-neutral-800 px-4 py-3">
           <TouchableOpacity
             onPress={() => setCurrentSection('menu')}
             className="flex-row items-center"
           >
-            <FontAwesome name="chevron-left" size={20} color="#3B82F6" />
-            <Text className="ml-2 text-blue-600 font-semibold">Back to Menu</Text>
+            <FontAwesome name="chevron-left" size={20} color="#FF7A55" />
+            <Text className="ml-2 text-primary-500 font-semibold">Back to Menu</Text>
           </TouchableOpacity>
         </View>
         {renderContent()}
@@ -83,12 +83,12 @@ export default function FoodManagementScreen() {
   }
 
   return (
-    <View className="flex-1 bg-white dark:bg-gray-900">
+    <View className="flex-1 bg-cream-100 dark:bg-neutral-900">
       <View className="p-6">
-        <Text className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+        <Text className="text-3xl font-bold text-neutral-900 dark:text-white mb-2">
           Food Management
         </Text>
-        <Text className="text-gray-600 dark:text-gray-400 mb-6">
+        <Text className="text-neutral-600 dark:text-neutral-400 mb-6">
           Manage your meals, recipes, groceries, and pantry
         </Text>
 
@@ -96,7 +96,7 @@ export default function FoodManagementScreen() {
           {menuItems.map((item) => (
             <TouchableOpacity
               key={item.id}
-              className="bg-gray-50 dark:bg-gray-800 rounded-xl p-5 flex-row items-center border border-gray-200 dark:border-gray-700"
+              className="bg-cream-50 dark:bg-neutral-800 rounded-xl p-5 flex-row items-center border border-cream-300 dark:border-neutral-700 active:bg-cream-200 dark:active:bg-neutral-700"
               onPress={() => setCurrentSection(item.id)}
             >
               <View
@@ -105,26 +105,26 @@ export default function FoodManagementScreen() {
                 <FontAwesome name={item.icon} size={24} color="white" />
               </View>
               <View className="flex-1">
-                <Text className="text-lg font-semibold text-gray-900 dark:text-white mb-1">
+                <Text className="text-lg font-semibold text-neutral-900 dark:text-white mb-1">
                   {item.title}
                 </Text>
-                <Text className="text-sm text-gray-600 dark:text-gray-400">
+                <Text className="text-sm text-neutral-600 dark:text-neutral-400">
                   {item.description}
                 </Text>
               </View>
-              <FontAwesome name="chevron-right" size={20} color="#9CA3AF" />
+              <FontAwesome name="chevron-right" size={20} color="#A8A29E" />
             </TouchableOpacity>
           ))}
         </View>
 
-        <View className="mt-8 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-200 dark:border-blue-800">
+        <View className="mt-8 p-4 bg-primary-50 dark:bg-primary-900/20 rounded-xl border border-primary-200 dark:border-primary-800">
           <View className="flex-row items-start">
-            <FontAwesome name="lightbulb-o" size={20} color="#3B82F6" />
+            <FontAwesome name="lightbulb-o" size={20} color="#FF7A55" />
             <View className="flex-1 ml-3">
-              <Text className="text-sm font-semibold text-blue-900 dark:text-blue-200 mb-1">
+              <Text className="text-sm font-semibold text-primary-800 dark:text-primary-200 mb-1">
                 Quick Tip
               </Text>
-              <Text className="text-sm text-blue-800 dark:text-blue-300">
+              <Text className="text-sm text-primary-700 dark:text-primary-300">
                 Use the Chat tab to ask Claude for recipe suggestions, meal plans, or cooking tips based on your pantry items!
               </Text>
             </View>

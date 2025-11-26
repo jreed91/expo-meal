@@ -98,21 +98,21 @@ export default function GroceryScreen() {
   };
 
   return (
-    <View className="flex-1 bg-white dark:bg-gray-900">
-      <View className="p-4 border-b border-gray-200 dark:border-gray-800">
-        <Text className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+    <View className="flex-1 bg-cream-100 dark:bg-neutral-900">
+      <View className="p-4 border-b border-cream-300 dark:border-neutral-800">
+        <Text className="text-2xl font-bold text-neutral-900 dark:text-white mb-4">
           Grocery Lists
         </Text>
 
         <View className="flex-row space-x-2">
           <TouchableOpacity
-            className="flex-1 bg-blue-600 py-3 rounded-lg items-center"
+            className="flex-1 bg-primary-500 py-3 rounded-lg items-center"
             onPress={() => setModalVisible(true)}
           >
             <Text className="text-white font-semibold">New List</Text>
           </TouchableOpacity>
           <TouchableOpacity
-            className="flex-1 bg-green-600 py-3 rounded-lg items-center"
+            className="flex-1 bg-success-600 py-3 rounded-lg items-center"
             onPress={() => setGenerateModalVisible(true)}
           >
             <Text className="text-white font-semibold">From Meal Plan</Text>
@@ -129,7 +129,7 @@ export default function GroceryScreen() {
         {groceryLists.length === 0 ? (
           <View className="flex-1 items-center justify-center py-12">
             <FontAwesome name="shopping-cart" size={48} color="#9CA3AF" />
-            <Text className="text-gray-600 dark:text-gray-400 mt-4 text-center">
+            <Text className="text-neutral-600 dark:text-neutral-400 mt-4 text-center">
               No grocery lists yet{'\n'}Create one or generate from meal plan!
             </Text>
           </View>
@@ -138,14 +138,14 @@ export default function GroceryScreen() {
             {groceryLists.map((list) => (
               <TouchableOpacity
                 key={list.id}
-                className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 mb-3 flex-row justify-between items-center"
+                className="bg-cream-50 dark:bg-neutral-800 rounded-lg p-4 mb-3 flex-row justify-between items-center"
                 onPress={() => router.push(`/grocery/${list.id}`)}
               >
                 <View className="flex-1">
-                  <Text className="text-lg font-semibold text-gray-900 dark:text-white">
+                  <Text className="text-lg font-semibold text-neutral-900 dark:text-white">
                     {list.name}
                   </Text>
-                  <Text className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                  <Text className="text-sm text-neutral-500 dark:text-neutral-400 mt-1">
                     Created{' '}
                     {new Date(list.created_at).toLocaleDateString(undefined, {
                       month: 'short',
@@ -177,9 +177,9 @@ export default function GroceryScreen() {
         onRequestClose={() => setModalVisible(false)}
       >
         <View className="flex-1 justify-end bg-black/50">
-          <View className="bg-white dark:bg-gray-900 rounded-t-3xl p-6">
+          <View className="bg-cream-100 dark:bg-neutral-900 rounded-t-3xl p-6">
             <View className="flex-row justify-between items-center mb-4">
-              <Text className="text-xl font-bold text-gray-900 dark:text-white">
+              <Text className="text-xl font-bold text-neutral-900 dark:text-white">
                 New Grocery List
               </Text>
               <TouchableOpacity onPress={() => setModalVisible(false)}>
@@ -188,15 +188,15 @@ export default function GroceryScreen() {
             </View>
 
             <TextInput
-              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white mb-4"
+              className="w-full px-4 py-3 border border-neutral-300 dark:border-neutral-700 rounded-lg bg-cream-100 dark:bg-neutral-800 text-neutral-900 dark:text-white mb-4"
               placeholder="List name"
-              placeholderTextColor="#9CA3AF"
+              placeholderTextColor="#A8A29E"
               value={listName}
               onChangeText={setListName}
             />
 
             <TouchableOpacity
-              className="bg-blue-600 py-3 rounded-lg items-center"
+              className="bg-primary-500 py-3 rounded-lg items-center"
               onPress={handleCreateList}
             >
               <Text className="text-white font-semibold">Create List</Text>
@@ -212,9 +212,9 @@ export default function GroceryScreen() {
         onRequestClose={() => setGenerateModalVisible(false)}
       >
         <View className="flex-1 justify-end bg-black/50">
-          <View className="bg-white dark:bg-gray-900 rounded-t-3xl p-6">
+          <View className="bg-cream-100 dark:bg-neutral-900 rounded-t-3xl p-6">
             <View className="flex-row justify-between items-center mb-4">
-              <Text className="text-xl font-bold text-gray-900 dark:text-white">
+              <Text className="text-xl font-bold text-neutral-900 dark:text-white">
                 Generate from Meal Plan
               </Text>
               <TouchableOpacity
@@ -224,18 +224,18 @@ export default function GroceryScreen() {
               </TouchableOpacity>
             </View>
 
-            <Text className="text-gray-600 dark:text-gray-400 mb-3">
+            <Text className="text-neutral-600 dark:text-neutral-400 mb-3">
               This will create a grocery list from your upcoming meal plan
             </Text>
 
             <View className="mb-4">
-              <Text className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <Text className="text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
                 Number of days ahead
               </Text>
               <TextInput
-                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                className="w-full px-4 py-3 border border-neutral-300 dark:border-neutral-700 rounded-lg bg-cream-100 dark:bg-neutral-800 text-neutral-900 dark:text-white"
                 placeholder="7"
-                placeholderTextColor="#9CA3AF"
+                placeholderTextColor="#A8A29E"
                 value={daysAhead}
                 onChangeText={setDaysAhead}
                 keyboardType="numeric"
@@ -243,7 +243,7 @@ export default function GroceryScreen() {
             </View>
 
             <TouchableOpacity
-              className="bg-green-600 py-3 rounded-lg items-center"
+              className="bg-success-600 py-3 rounded-lg items-center"
               onPress={handleGenerateFromMealPlan}
             >
               <Text className="text-white font-semibold">Generate List</Text>

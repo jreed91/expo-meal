@@ -69,36 +69,36 @@ export default function ProfileScreen() {
   };
 
   return (
-    <ScrollView className="flex-1 bg-white dark:bg-gray-900">
+    <ScrollView className="flex-1 bg-cream-100 dark:bg-neutral-900">
       <View className="p-6">
-        <Text className="text-3xl font-bold text-gray-900 dark:text-white mb-6">
+        <Text className="text-3xl font-bold text-neutral-900 dark:text-white mb-6">
           Profile
         </Text>
 
-        <View className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 mb-6">
-          <Text className="text-sm text-gray-600 dark:text-gray-400 mb-1">
+        <View className="bg-cream-50 dark:bg-neutral-800 rounded-xl p-4 mb-6">
+          <Text className="text-sm text-neutral-600 dark:text-neutral-400 mb-1">
             Email
           </Text>
-          <Text className="text-lg text-gray-900 dark:text-white">
+          <Text className="text-lg text-neutral-900 dark:text-white">
             {user?.email}
           </Text>
         </View>
 
         <View className="mb-4">
-          <Text className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <Text className="text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
             Full Name
           </Text>
           {editing ? (
             <TextInput
-              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+              className="w-full px-4 py-3 border border-neutral-300 dark:border-neutral-700 rounded-xl bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white"
               value={fullName}
               onChangeText={setFullName}
               placeholder="Your name"
-              placeholderTextColor="#9CA3AF"
+              placeholderTextColor="#A8A29E"
             />
           ) : (
-            <View className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
-              <Text className="text-lg text-gray-900 dark:text-white">
+            <View className="bg-cream-50 dark:bg-neutral-800 rounded-xl p-4">
+              <Text className="text-lg text-neutral-900 dark:text-white">
                 {profile?.full_name || 'Not set'}
               </Text>
             </View>
@@ -106,21 +106,21 @@ export default function ProfileScreen() {
         </View>
 
         <View className="mb-6">
-          <Text className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <Text className="text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
             Allergies
           </Text>
           {editing ? (
             <TextInput
-              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+              className="w-full px-4 py-3 border border-neutral-300 dark:border-neutral-700 rounded-xl bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white"
               value={allergies}
               onChangeText={setAllergies}
               placeholder="e.g., Peanuts, Shellfish, Dairy"
-              placeholderTextColor="#9CA3AF"
+              placeholderTextColor="#A8A29E"
               multiline
             />
           ) : (
-            <View className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
-              <Text className="text-lg text-gray-900 dark:text-white">
+            <View className="bg-cream-50 dark:bg-neutral-800 rounded-xl p-4">
+              <Text className="text-lg text-neutral-900 dark:text-white">
                 {profile?.allergies && profile.allergies.length > 0
                   ? profile.allergies.join(', ')
                   : 'None specified'}
@@ -128,7 +128,7 @@ export default function ProfileScreen() {
             </View>
           )}
           {editing && (
-            <Text className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+            <Text className="text-sm text-neutral-500 dark:text-neutral-400 mt-1">
               Separate multiple allergies with commas
             </Text>
           )}
@@ -137,25 +137,25 @@ export default function ProfileScreen() {
         {editing ? (
           <View className="flex-row space-x-3">
             <TouchableOpacity
-              className="flex-1 bg-blue-600 py-3 rounded-lg items-center"
+              className="flex-1 bg-primary-500 py-3 rounded-xl items-center active:bg-primary-600"
               onPress={handleSave}
               disabled={loading}
             >
               <Text className="text-white font-semibold">Save</Text>
             </TouchableOpacity>
             <TouchableOpacity
-              className="flex-1 bg-gray-300 dark:bg-gray-700 py-3 rounded-lg items-center"
+              className="flex-1 bg-neutral-300 dark:bg-neutral-700 py-3 rounded-xl items-center active:bg-neutral-400 dark:active:bg-neutral-600"
               onPress={handleCancel}
               disabled={loading}
             >
-              <Text className="text-gray-700 dark:text-gray-300 font-semibold">
+              <Text className="text-neutral-700 dark:text-neutral-300 font-semibold">
                 Cancel
               </Text>
             </TouchableOpacity>
           </View>
         ) : (
           <TouchableOpacity
-            className="bg-blue-600 py-3 rounded-lg items-center mb-4"
+            className="bg-primary-500 py-3 rounded-xl items-center mb-4 active:bg-primary-600"
             onPress={() => setEditing(true)}
           >
             <Text className="text-white font-semibold">Edit Profile</Text>
@@ -163,7 +163,7 @@ export default function ProfileScreen() {
         )}
 
         <TouchableOpacity
-          className="bg-red-600 py-3 rounded-lg items-center mt-4"
+          className="bg-danger-600 py-3 rounded-xl items-center mt-4 active:bg-danger-700"
           onPress={handleSignOut}
         >
           <Text className="text-white font-semibold">Sign Out</Text>

@@ -301,16 +301,16 @@ export default function ChatScreen() {
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        className="flex-1 bg-white dark:bg-gray-900"
+        className="flex-1 bg-cream-100 dark:bg-neutral-900"
         keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
       >
-        <View className="p-4 border-b border-gray-200 dark:border-gray-800">
+        <View className="p-4 border-b border-cream-300 dark:border-neutral-800">
           <View className="flex-row items-center justify-between">
             <View className="flex-1">
-              <Text className="text-2xl font-bold text-gray-900 dark:text-white">
+              <Text className="text-2xl font-bold text-neutral-900 dark:text-neutral-50">
                 Chat with Claude
               </Text>
-              <Text className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              <Text className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">
                 {storedMessages.length > 0
                   ? `${storedMessages.length} messages • Auto-saved`
                   : 'Tap anywhere to dismiss keyboard'}
@@ -319,9 +319,9 @@ export default function ChatScreen() {
             {storedMessages.length > 0 && (
               <TouchableOpacity
                 onPress={handleNewChat}
-                className="ml-3 p-2 bg-gray-100 dark:bg-gray-800 rounded-lg"
+                className="ml-3 p-2 bg-cream-50 dark:bg-neutral-800 rounded-xl active:bg-cream-200 dark:active:bg-neutral-700"
               >
-                <FontAwesome name="plus" size={18} color="#6B7280" />
+                <FontAwesome name="plus" size={18} color="#A8A29E" />
               </TouchableOpacity>
             )}
           </View>
@@ -342,12 +342,12 @@ export default function ChatScreen() {
             className={`mb-4 ${message.role === 'user' ? 'items-end' : 'items-start'}`}
           >
             <View
-              className={`max-w-[80%] p-3 rounded-lg ${
+              className={`max-w-[80%] p-4 rounded-2xl ${
                 message.role === 'user'
-                  ? 'bg-blue-600'
+                  ? 'bg-primary-500'
                   : message.toolCalls && message.toolCalls.length > 0
-                    ? 'bg-green-50 dark:bg-green-900 border-2 border-green-500'
-                    : 'bg-gray-100 dark:bg-gray-800'
+                    ? 'bg-success-50 dark:bg-success-900/20 border-2 border-success-500'
+                    : 'bg-white dark:bg-neutral-800'
               }`}
             >
               {message.toolCalls && message.toolCalls.length > 0 && (
@@ -357,7 +357,7 @@ export default function ChatScreen() {
                     size={16}
                     color="#22c55e"
                   />
-                  <Text className="text-green-600 dark:text-green-400 font-semibold ml-2">
+                  <Text className="text-success-600 dark:text-success-400 font-semibold ml-2">
                     Action Performed
                   </Text>
                 </View>
@@ -366,13 +366,13 @@ export default function ChatScreen() {
                 className={`${
                   message.role === 'user'
                     ? 'text-white'
-                    : 'text-gray-900 dark:text-white'
+                    : 'text-neutral-900 dark:text-neutral-50'
                 }`}
               >
                 {message.content}
               </Text>
             </View>
-            <Text className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+            <Text className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">
               {message.timestamp.toLocaleTimeString(undefined, {
                 hour: '2-digit',
                 minute: '2-digit',
@@ -383,24 +383,24 @@ export default function ChatScreen() {
 
         {loading && (
           <View className="items-start mb-4">
-            <View className="bg-gray-100 dark:bg-gray-800 p-3 rounded-lg">
-              <ActivityIndicator size="small" color="#3B82F6" />
+            <View className="bg-white dark:bg-neutral-800 p-4 rounded-2xl">
+              <ActivityIndicator size="small" color="#FF7A55" />
             </View>
           </View>
         )}
 
         {messages.length === 1 && (
           <View className="mt-4">
-            <Text className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+            <Text className="text-sm font-semibold text-neutral-700 dark:text-neutral-300 mb-3">
               Try asking:
             </Text>
             {suggestedPrompts.map((prompt, index) => (
               <TouchableOpacity
                 key={index}
-                className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg mb-2 border border-gray-200 dark:border-gray-700"
+                className="bg-white dark:bg-neutral-800 p-4 rounded-2xl mb-3 border border-cream-300 dark:border-neutral-700 active:bg-cream-200 dark:active:bg-neutral-700"
                 onPress={() => handleSuggestedPrompt(prompt)}
               >
-                <Text className="text-gray-700 dark:text-gray-300">
+                <Text className="text-neutral-700 dark:text-neutral-300">
                   {prompt}
                 </Text>
               </TouchableOpacity>
@@ -409,12 +409,12 @@ export default function ChatScreen() {
         )}
       </ScrollView>
 
-      <View className="p-4 border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">
+      <View className="p-4 border-t border-cream-300 dark:border-neutral-800 bg-cream-50 dark:bg-neutral-900">
         <View className="flex-row items-center gap-2">
           <TextInput
-            className="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+            className="flex-1 px-4 py-3 border border-neutral-300 dark:border-neutral-700 rounded-2xl bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white"
             placeholder="Ask me anything about cooking..."
-            placeholderTextColor="#9CA3AF"
+            placeholderTextColor="#A8A29E"
             value={inputText}
             onChangeText={setInputText}
             maxLength={500}
@@ -425,8 +425,8 @@ export default function ChatScreen() {
             enablesReturnKeyAutomatically
           />
           <TouchableOpacity
-            className={`p-3 rounded-lg ${
-              inputText.trim() && !loading ? 'bg-blue-600' : 'bg-gray-300 dark:bg-gray-700'
+            className={`p-4 rounded-2xl ${
+              inputText.trim() && !loading ? 'bg-primary-500 active:bg-primary-600' : 'bg-neutral-300 dark:bg-neutral-700'
             }`}
             onPress={handleSend}
             disabled={!inputText.trim() || loading}

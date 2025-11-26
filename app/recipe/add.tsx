@@ -92,13 +92,13 @@ export default function AddRecipeScreen() {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      className="flex-1 bg-white dark:bg-gray-900"
+      className="flex-1 bg-cream-100 dark:bg-neutral-900"
     >
-      <View className="flex-row items-center justify-between p-4 border-b border-gray-200 dark:border-gray-800">
+      <View className="flex-row items-center justify-between p-4 border-b border-cream-300 dark:border-neutral-800">
         <TouchableOpacity onPress={() => router.back()}>
-          <FontAwesome name="arrow-left" size={24} color="#3B82F6" />
+          <FontAwesome name="arrow-left" size={24} color="#FF7A55" />
         </TouchableOpacity>
-        <Text className="text-xl font-bold text-gray-900 dark:text-white">
+        <Text className="text-xl font-bold text-neutral-900 dark:text-white">
           Add Recipe
         </Text>
         <View style={{ width: 24 }} />
@@ -106,28 +106,28 @@ export default function AddRecipeScreen() {
 
       <ScrollView className="flex-1 p-4">
         <View className="mb-4">
-          <Text className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <Text className="text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
             Title *
           </Text>
           <TextInput
-            className="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+            className="w-full px-4 py-3 border border-neutral-300 dark:border-neutral-700 rounded-lg bg-cream-100 dark:bg-neutral-800 text-neutral-900 dark:text-white"
             placeholder="Recipe name"
-            placeholderTextColor="#9CA3AF"
+            placeholderTextColor="#A8A29E"
             value={title}
             onChangeText={setTitle}
           />
         </View>
 
-        <Text className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
+        <Text className="text-lg font-semibold text-neutral-900 dark:text-white mb-3">
           Ingredients *
         </Text>
         {ingredients.map((ingredient, index) => (
           <View key={index} className="flex-row items-center mb-3">
             <View className="flex-1 mr-2">
               <TextInput
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                className="w-full px-3 py-2 border border-neutral-300 dark:border-neutral-700 rounded-lg bg-cream-100 dark:bg-neutral-800 text-neutral-900 dark:text-white"
                 placeholder="Name"
-                placeholderTextColor="#9CA3AF"
+                placeholderTextColor="#A8A29E"
                 value={ingredient.name}
                 onChangeText={(value) =>
                   updateIngredient(index, 'name', value)
@@ -136,9 +136,9 @@ export default function AddRecipeScreen() {
             </View>
             <View className="w-20 mr-2">
               <TextInput
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                className="w-full px-3 py-2 border border-neutral-300 dark:border-neutral-700 rounded-lg bg-cream-100 dark:bg-neutral-800 text-neutral-900 dark:text-white"
                 placeholder="Qty"
-                placeholderTextColor="#9CA3AF"
+                placeholderTextColor="#A8A29E"
                 value={ingredient.quantity.toString()}
                 onChangeText={(value) =>
                   updateIngredient(index, 'quantity', parseFloat(value) || 0)
@@ -148,9 +148,9 @@ export default function AddRecipeScreen() {
             </View>
             <View className="w-20 mr-2">
               <TextInput
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                className="w-full px-3 py-2 border border-neutral-300 dark:border-neutral-700 rounded-lg bg-cream-100 dark:bg-neutral-800 text-neutral-900 dark:text-white"
                 placeholder="Unit"
-                placeholderTextColor="#9CA3AF"
+                placeholderTextColor="#A8A29E"
                 value={ingredient.unit}
                 onChangeText={(value) => updateIngredient(index, 'unit', value)}
               />
@@ -166,19 +166,19 @@ export default function AddRecipeScreen() {
           className="bg-gray-200 dark:bg-gray-700 py-2 rounded-lg items-center mb-4"
           onPress={addIngredient}
         >
-          <Text className="text-gray-700 dark:text-gray-300 font-semibold">
+          <Text className="text-neutral-700 dark:text-neutral-300 font-semibold">
             + Add Ingredient
           </Text>
         </TouchableOpacity>
 
         <View className="mb-4">
-          <Text className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <Text className="text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
             Instructions *
           </Text>
           <TextInput
-            className="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+            className="w-full px-4 py-3 border border-neutral-300 dark:border-neutral-700 rounded-lg bg-cream-100 dark:bg-neutral-800 text-neutral-900 dark:text-white"
             placeholder="Step-by-step instructions"
-            placeholderTextColor="#9CA3AF"
+            placeholderTextColor="#A8A29E"
             value={instructions}
             onChangeText={setInstructions}
             multiline
@@ -189,39 +189,39 @@ export default function AddRecipeScreen() {
 
         <View className="flex-row space-x-3 mb-4">
           <View className="flex-1">
-            <Text className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <Text className="text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
               Servings
             </Text>
             <TextInput
-              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+              className="w-full px-4 py-3 border border-neutral-300 dark:border-neutral-700 rounded-lg bg-cream-100 dark:bg-neutral-800 text-neutral-900 dark:text-white"
               placeholder="4"
-              placeholderTextColor="#9CA3AF"
+              placeholderTextColor="#A8A29E"
               value={servings}
               onChangeText={setServings}
               keyboardType="numeric"
             />
           </View>
           <View className="flex-1">
-            <Text className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <Text className="text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
               Prep Time (min)
             </Text>
             <TextInput
-              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+              className="w-full px-4 py-3 border border-neutral-300 dark:border-neutral-700 rounded-lg bg-cream-100 dark:bg-neutral-800 text-neutral-900 dark:text-white"
               placeholder="15"
-              placeholderTextColor="#9CA3AF"
+              placeholderTextColor="#A8A29E"
               value={prepTime}
               onChangeText={setPrepTime}
               keyboardType="numeric"
             />
           </View>
           <View className="flex-1">
-            <Text className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <Text className="text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
               Cook Time (min)
             </Text>
             <TextInput
-              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+              className="w-full px-4 py-3 border border-neutral-300 dark:border-neutral-700 rounded-lg bg-cream-100 dark:bg-neutral-800 text-neutral-900 dark:text-white"
               placeholder="30"
-              placeholderTextColor="#9CA3AF"
+              placeholderTextColor="#A8A29E"
               value={cookTime}
               onChangeText={setCookTime}
               keyboardType="numeric"
@@ -230,33 +230,33 @@ export default function AddRecipeScreen() {
         </View>
 
         <View className="mb-4">
-          <Text className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <Text className="text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
             Source
           </Text>
           <TextInput
-            className="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+            className="w-full px-4 py-3 border border-neutral-300 dark:border-neutral-700 rounded-lg bg-cream-100 dark:bg-neutral-800 text-neutral-900 dark:text-white"
             placeholder="Website, book, or person"
-            placeholderTextColor="#9CA3AF"
+            placeholderTextColor="#A8A29E"
             value={source}
             onChangeText={setSource}
           />
         </View>
 
         <View className="mb-4">
-          <Text className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <Text className="text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
             Tags (comma separated)
           </Text>
           <TextInput
-            className="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+            className="w-full px-4 py-3 border border-neutral-300 dark:border-neutral-700 rounded-lg bg-cream-100 dark:bg-neutral-800 text-neutral-900 dark:text-white"
             placeholder="Italian, Pasta, Quick"
-            placeholderTextColor="#9CA3AF"
+            placeholderTextColor="#A8A29E"
             value={tags}
             onChangeText={setTags}
           />
         </View>
 
         <TouchableOpacity
-          className="bg-blue-600 py-4 rounded-lg items-center mb-6"
+          className="bg-primary-500 py-4 rounded-lg items-center mb-6"
           onPress={handleSave}
           disabled={loading}
         >

@@ -125,14 +125,14 @@ export default function MealPlannerScreen() {
   const favoriteRecipes = recipes.filter((r) => r.is_favorite);
 
   return (
-    <View className="flex-1 bg-white dark:bg-gray-900">
-      <View className="p-4 border-b border-gray-200 dark:border-gray-800">
+    <View className="flex-1 bg-cream-100 dark:bg-neutral-900">
+      <View className="p-4 border-b border-cream-300 dark:border-neutral-800">
         <View className="flex-row items-center justify-between mb-3">
           <TouchableOpacity onPress={goToPreviousWeek}>
-            <FontAwesome name="chevron-left" size={24} color="#3B82F6" />
+            <FontAwesome name="chevron-left" size={24} color="#FF7A55" />
           </TouchableOpacity>
           <TouchableOpacity onPress={goToToday}>
-            <Text className="text-lg font-semibold text-gray-900 dark:text-white">
+            <Text className="text-lg font-semibold text-neutral-900 dark:text-white">
               Week of{' '}
               {selectedWeekStart.toLocaleDateString(undefined, {
                 month: 'short',
@@ -141,7 +141,7 @@ export default function MealPlannerScreen() {
             </Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={goToNextWeek}>
-            <FontAwesome name="chevron-right" size={24} color="#3B82F6" />
+            <FontAwesome name="chevron-right" size={24} color="#FF7A55" />
           </TouchableOpacity>
         </View>
       </View>
@@ -157,9 +157,9 @@ export default function MealPlannerScreen() {
         {weekDates.map((date, dayIndex) => {
           const meals = getMealsForDate(date);
           return (
-            <View key={dayIndex} className="w-72 border-r border-gray-200 dark:border-gray-800">
+            <View key={dayIndex} className="w-72 border-r border-cream-300 dark:border-neutral-800">
               <View
-                className={`p-3 border-b border-gray-200 dark:border-gray-800 ${
+                className={`p-3 border-b border-cream-300 dark:border-neutral-800 ${
                   isToday(date) ? 'bg-blue-100 dark:bg-blue-900' : ''
                 }`}
               >
@@ -167,7 +167,7 @@ export default function MealPlannerScreen() {
                   className={`text-center font-semibold ${
                     isToday(date)
                       ? 'text-blue-800 dark:text-blue-200'
-                      : 'text-gray-900 dark:text-white'
+                      : 'text-neutral-900 dark:text-white'
                   }`}
                 >
                   {formatDateHeader(date)}
@@ -181,7 +181,7 @@ export default function MealPlannerScreen() {
                   );
                   return (
                     <View key={mealType} className="mb-4">
-                      <Text className="text-xs uppercase text-gray-500 dark:text-gray-400 font-semibold mb-2">
+                      <Text className="text-xs uppercase text-neutral-500 dark:text-neutral-400 font-semibold mb-2">
                         {mealType}
                       </Text>
                       {mealsForType.length > 0 ? (
@@ -192,10 +192,10 @@ export default function MealPlannerScreen() {
                           return (
                             <TouchableOpacity
                               key={meal.id}
-                              className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3 mb-2"
+                              className="bg-cream-50 dark:bg-neutral-800 rounded-lg p-3 mb-2"
                               onLongPress={() => handleDeleteMeal(meal.id)}
                             >
-                              <Text className="text-gray-900 dark:text-white font-medium">
+                              <Text className="text-neutral-900 dark:text-white font-medium">
                                 {recipe?.title || meal.meal_name || 'Meal'}
                               </Text>
                               {recipe?.is_favorite && (
@@ -211,7 +211,7 @@ export default function MealPlannerScreen() {
                         })
                       ) : (
                         <TouchableOpacity
-                          className="bg-gray-100 dark:bg-gray-800 rounded-lg p-3 items-center border border-dashed border-gray-300 dark:border-gray-700"
+                          className="bg-gray-100 dark:bg-neutral-800 rounded-lg p-3 items-center border border-dashed border-neutral-300 dark:border-neutral-700"
                           onPress={() => handleAddMeal(date, mealType)}
                         >
                           <FontAwesome name="plus" size={16} color="#9CA3AF" />
@@ -233,9 +233,9 @@ export default function MealPlannerScreen() {
         onRequestClose={() => setModalVisible(false)}
       >
         <View className="flex-1 justify-end bg-black/50">
-          <View className="bg-white dark:bg-gray-900 rounded-t-3xl p-6 max-h-3/4">
+          <View className="bg-cream-100 dark:bg-neutral-900 rounded-t-3xl p-6 max-h-3/4">
             <View className="flex-row justify-between items-center mb-4">
-              <Text className="text-xl font-bold text-gray-900 dark:text-white">
+              <Text className="text-xl font-bold text-neutral-900 dark:text-white">
                 Add {selectedMealType}
               </Text>
               <TouchableOpacity onPress={() => setModalVisible(false)}>
@@ -245,7 +245,7 @@ export default function MealPlannerScreen() {
 
             {favoriteRecipes.length > 0 && (
               <View className="mb-4">
-                <Text className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                <Text className="text-sm font-semibold text-neutral-700 dark:text-neutral-300 mb-2">
                   Favorites
                 </Text>
                 <ScrollView horizontal showsHorizontalScrollIndicator={false}>
@@ -256,7 +256,7 @@ export default function MealPlannerScreen() {
                       onPress={() => handleSelectRecipe(recipe.id)}
                     >
                       <FontAwesome name="star" size={16} color="#EAB308" />
-                      <Text className="text-gray-900 dark:text-white font-medium mt-1">
+                      <Text className="text-neutral-900 dark:text-white font-medium mt-1">
                         {recipe.title}
                       </Text>
                     </TouchableOpacity>
@@ -265,17 +265,17 @@ export default function MealPlannerScreen() {
               </View>
             )}
 
-            <Text className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+            <Text className="text-sm font-semibold text-neutral-700 dark:text-neutral-300 mb-2">
               All Recipes
             </Text>
             <ScrollView>
               {recipes.map((recipe) => (
                 <TouchableOpacity
                   key={recipe.id}
-                  className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 mb-2 flex-row justify-between items-center"
+                  className="bg-cream-50 dark:bg-neutral-800 rounded-lg p-4 mb-2 flex-row justify-between items-center"
                   onPress={() => handleSelectRecipe(recipe.id)}
                 >
-                  <Text className="text-gray-900 dark:text-white font-medium flex-1">
+                  <Text className="text-neutral-900 dark:text-white font-medium flex-1">
                     {recipe.title}
                   </Text>
                   {recipe.is_favorite && (
@@ -284,7 +284,7 @@ export default function MealPlannerScreen() {
                 </TouchableOpacity>
               ))}
               {recipes.length === 0 && (
-                <Text className="text-center text-gray-500 dark:text-gray-400 py-4">
+                <Text className="text-center text-neutral-500 dark:text-neutral-400 py-4">
                   No recipes yet. Add recipes first!
                 </Text>
               )}
