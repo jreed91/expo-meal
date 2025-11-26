@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { supabase } from '@/lib/supabase';
 import { Session, User } from '@supabase/supabase-js';
 import { Database } from '@/types/database.types';
+import * as profileApi from '@/lib/profileApi';
 
 type Profile = Database['public']['Tables']['profiles']['Row'];
 
@@ -56,14 +57,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       const { user } = get();
       if (!user) return;
 
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', user.id)
-        .single();
-
-      if (error) throw error;
-      set({ profile: data });
+      const profile = await profileApi.fetchProfile();
+      set({ profile });
     } catch (error) {
       console.error('Error fetching profile:', error);
     }

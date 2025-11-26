@@ -8,7 +8,7 @@ import {
   Alert,
 } from 'react-native';
 import { useAuthStore } from '@/store/authStore';
-import { supabase } from '@/lib/supabase';
+import * as profileApi from '@/lib/profileApi';
 
 export default function ProfileScreen() {
   const { profile, user, signOut, fetchProfile } = useAuthStore();
@@ -29,15 +29,10 @@ export default function ProfileScreen() {
         .map((a) => a.trim())
         .filter((a) => a);
 
-      const { error } = await supabase
-        .from('profiles')
-        .update({
-          full_name: fullName,
-          allergies: allergiesArray,
-        })
-        .eq('id', user.id);
-
-      if (error) throw error;
+      await profileApi.updateProfile({
+        full_name: fullName,
+        allergies: allergiesArray,
+      });
 
       await fetchProfile();
       setEditing(false);

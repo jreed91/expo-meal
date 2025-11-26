@@ -1,12 +1,12 @@
 import { create } from 'zustand';
-import { supabase } from '@/lib/supabase';
 import { Database, RecipeIngredient } from '@/types/database.types';
+import * as groceryApi from '@/lib/groceryApi';
+import { supabase } from '@/lib/supabase';
 
 type GroceryList = Database['public']['Tables']['grocery_lists']['Row'];
 type GroceryListItem = Database['public']['Tables']['grocery_list_items']['Row'];
-type GroceryListInsert = Database['public']['Tables']['grocery_lists']['Insert'];
-type GroceryListItemInsert =
-  Database['public']['Tables']['grocery_list_items']['Insert'];
+type GroceryListInsert = Omit<Database['public']['Tables']['grocery_lists']['Insert'], 'user_id'>;
+type GroceryListItemInsert = Omit<Database['public']['Tables']['grocery_list_items']['Insert'], 'list_id'>;
 
 interface GroceryState {
   groceryLists: GroceryList[];
@@ -22,7 +22,7 @@ interface GroceryState {
   deleteGroceryList: (id: string) => Promise<void>;
   addItemToList: (
     listId: string,
-    item: Omit<GroceryListItemInsert, 'grocery_list_id'>
+    item: GroceryListItemInsert
   ) => Promise<void>;
   toggleItemChecked: (listId: string, itemId: string) => Promise<void>;
   deleteItem: (listId: string, itemId: string) => Promise<void>;
@@ -77,13 +77,8 @@ export const useGroceryStore = create<GroceryState>((set, get) => ({
   fetchGroceryLists: async () => {
     try {
       set({ loading: true });
-      const { data, error } = await supabase
-        .from('grocery_lists')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      set({ groceryLists: data || [] });
+      const lists = await groceryApi.fetchGroceryLists();
+      set({ groceryLists: lists });
     } catch (error) {
       console.error('Error fetching grocery lists:', error);
     } finally {
@@ -93,18 +88,11 @@ export const useGroceryStore = create<GroceryState>((set, get) => ({
 
   fetchGroceryListItems: async (listId) => {
     try {
-      const { data, error } = await supabase
-        .from('grocery_list_items')
-        .select('*')
-        .eq('grocery_list_id', listId)
-        .order('category', { ascending: true });
-
-      if (error) throw error;
-
+      const items = await groceryApi.fetchGroceryListItems(listId);
       set((state) => ({
         groceryListItems: {
           ...state.groceryListItems,
-          [listId]: data || [],
+          [listId]: items,
         },
       }));
     } catch (error) {
@@ -114,24 +102,11 @@ export const useGroceryStore = create<GroceryState>((set, get) => ({
 
   createGroceryList: async (name) => {
     try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (!user) throw new Error('Not authenticated');
-
-      const { data, error } = await supabase
-        .from('grocery_lists')
-        .insert([{ name, user_id: user.id }])
-        .select()
-        .single();
-
-      if (error) throw error;
-
+      const newList = await groceryApi.createGroceryList({ name });
       set((state) => ({
-        groceryLists: [data, ...state.groceryLists],
+        groceryLists: [newList, ...state.groceryLists],
       }));
-
-      return data;
+      return newList;
     } catch (error) {
       console.error('Error creating grocery list:', error);
       throw error;
@@ -140,13 +115,7 @@ export const useGroceryStore = create<GroceryState>((set, get) => ({
 
   deleteGroceryList: async (id) => {
     try {
-      const { error } = await supabase
-        .from('grocery_lists')
-        .delete()
-        .eq('id', id);
-
-      if (error) throw error;
-
+      await groceryApi.deleteGroceryList(id);
       set((state) => ({
         groceryLists: state.groceryLists.filter((l) => l.id !== id),
         groceryListItems: Object.fromEntries(
@@ -163,18 +132,15 @@ export const useGroceryStore = create<GroceryState>((set, get) => ({
 
   addItemToList: async (listId, item) => {
     try {
-      const { data, error } = await supabase
-        .from('grocery_list_items')
-        .insert([{ ...item, grocery_list_id: listId }])
-        .select()
-        .single();
-
-      if (error) throw error;
+      const newItem = await groceryApi.addGroceryListItem({
+        ...item,
+        list_id: listId,
+      });
 
       set((state) => ({
         groceryListItems: {
           ...state.groceryListItems,
-          [listId]: [...(state.groceryListItems[listId] || []), data],
+          [listId]: [...(state.groceryListItems[listId] || []), newItem],
         },
       }));
     } catch (error) {
@@ -189,18 +155,15 @@ export const useGroceryStore = create<GroceryState>((set, get) => ({
       const item = items.find((i) => i.id === itemId);
       if (!item) return;
 
-      const { error } = await supabase
-        .from('grocery_list_items')
-        .update({ is_checked: !item.is_checked })
-        .eq('id', itemId);
-
-      if (error) throw error;
+      const updatedItem = await groceryApi.updateGroceryListItem(itemId, {
+        is_checked: !item.is_checked,
+      });
 
       set((state) => ({
         groceryListItems: {
           ...state.groceryListItems,
           [listId]: items.map((i) =>
-            i.id === itemId ? { ...i, is_checked: !i.is_checked } : i
+            i.id === itemId ? updatedItem : i
           ),
         },
       }));
@@ -212,12 +175,7 @@ export const useGroceryStore = create<GroceryState>((set, get) => ({
 
   deleteItem: async (listId, itemId) => {
     try {
-      const { error } = await supabase
-        .from('grocery_list_items')
-        .delete()
-        .eq('id', itemId);
-
-      if (error) throw error;
+      await groceryApi.deleteGroceryListItem(itemId);
 
       set((state) => ({
         groceryListItems: {
@@ -235,12 +193,9 @@ export const useGroceryStore = create<GroceryState>((set, get) => ({
 
   generateFromMealPlan: async (listName, startDate, endDate) => {
     try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (!user) throw new Error('Not authenticated');
-
       // Fetch meal plans for the date range
+      // Note: This still uses direct Supabase call because we need to join with recipes
+      // This could be migrated to an Edge Function later if needed
       const { data: mealPlans, error: mealError } = await supabase
         .from('meal_plans')
         .select('*, recipes(*)')

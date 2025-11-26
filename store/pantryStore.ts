@@ -1,18 +1,16 @@
 import { create } from 'zustand';
-import { supabase } from '@/lib/supabase';
 import { Database } from '@/types/database.types';
+import * as pantryApi from '@/lib/pantryApi';
 
 type PantryItem = Database['public']['Tables']['pantry_items']['Row'];
-type PantryItemInsert = Database['public']['Tables']['pantry_items']['Insert'];
+type PantryItemInsert = Omit<Database['public']['Tables']['pantry_items']['Insert'], 'user_id'>;
 type PantryItemUpdate = Database['public']['Tables']['pantry_items']['Update'];
 
 interface PantryState {
   pantryItems: PantryItem[];
   loading: boolean;
   fetchPantryItems: () => Promise<void>;
-  addPantryItem: (
-    item: Omit<PantryItemInsert, 'user_id'>
-  ) => Promise<PantryItem>;
+  addPantryItem: (item: PantryItemInsert) => Promise<PantryItem>;
   updatePantryItem: (id: string, item: PantryItemUpdate) => Promise<void>;
   deletePantryItem: (id: string) => Promise<void>;
   getExpiringItems: (days: number) => PantryItem[];
@@ -25,13 +23,8 @@ export const usePantryStore = create<PantryState>((set, get) => ({
   fetchPantryItems: async () => {
     try {
       set({ loading: true });
-      const { data, error } = await supabase
-        .from('pantry_items')
-        .select('*')
-        .order('expiry_date', { ascending: true, nullsFirst: false });
-
-      if (error) throw error;
-      set({ pantryItems: data || [] });
+      const items = await pantryApi.fetchPantryItems();
+      set({ pantryItems: items });
     } catch (error) {
       console.error('Error fetching pantry items:', error);
     } finally {
@@ -41,42 +34,23 @@ export const usePantryStore = create<PantryState>((set, get) => ({
 
   addPantryItem: async (item) => {
     try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (!user) throw new Error('Not authenticated');
-
-      const { data, error } = await supabase
-        .from('pantry_items')
-        .insert([{ ...item, user_id: user.id }])
-        .select()
-        .single();
-
-      if (error) throw error;
-
+      const newItem = await pantryApi.addPantryItem(item);
       set((state) => ({
-        pantryItems: [...state.pantryItems, data],
+        pantryItems: [...state.pantryItems, newItem],
       }));
-
-      return data;
+      return newItem;
     } catch (error) {
       console.error('Error adding pantry item:', error);
       throw error;
     }
   },
 
-  updatePantryItem: async (id, item) => {
+  updatePantryItem: async (id, updates) => {
     try {
-      const { error } = await supabase
-        .from('pantry_items')
-        .update(item)
-        .eq('id', id);
-
-      if (error) throw error;
-
+      const updatedItem = await pantryApi.updatePantryItem(id, updates);
       set((state) => ({
         pantryItems: state.pantryItems.map((i) =>
-          i.id === id ? { ...i, ...item } : i
+          i.id === id ? updatedItem : i
         ),
       }));
     } catch (error) {
@@ -87,13 +61,7 @@ export const usePantryStore = create<PantryState>((set, get) => ({
 
   deletePantryItem: async (id) => {
     try {
-      const { error } = await supabase
-        .from('pantry_items')
-        .delete()
-        .eq('id', id);
-
-      if (error) throw error;
-
+      await pantryApi.deletePantryItem(id);
       set((state) => ({
         pantryItems: state.pantryItems.filter((i) => i.id !== id),
       }));
