@@ -1,0 +1,7 @@
+# Supabase Edge Functions Configuration
+
+[functions.process-chat]
+verify_jwt = true
+
+[functions.get-messages]
+verify_jwt = true

@@ -43,7 +43,47 @@ This guide will help you set up the expo-meal app with Supabase backend and Clau
    - **Project URL** (e.g., `https://xxxxx.supabase.co`)
    - **anon/public key** (the `anon` key under "Project API keys")
 
-## 2. Anthropic API Setup
+## 2. Deploy Supabase Edge Functions
+
+The chat functionality uses Supabase Edge Functions to handle Claude AI integration on the backend.
+
+### Install Supabase CLI
+
+```bash
+npm install -g supabase
+```
+
+### Login and Link Project
+
+```bash
+# Login to Supabase
+supabase login
+
+# Link your project (replace with your project ref)
+supabase link --project-ref your-project-ref
+```
+
+### Set Environment Variables for Edge Functions
+
+```bash
+# Set your Anthropic API key as a secret
+supabase secrets set ANTHROPIC_API_KEY=your-anthropic-api-key
+```
+
+### Deploy the Functions
+
+```bash
+# Deploy all Edge Functions
+supabase functions deploy
+```
+
+This will deploy:
+- `process-chat` - Handles chat message processing and Claude AI integration
+- `get-messages` - Retrieves conversation history
+
+See `supabase/README.md` for more details on the Edge Functions.
+
+## 3. Anthropic API Setup
 
 1. Go to [https://console.anthropic.com](https://console.anthropic.com)
 2. Sign up or log in
@@ -51,7 +91,9 @@ This guide will help you set up the expo-meal app with Supabase backend and Clau
 4. Create a new API key
 5. Copy the key (you won't be able to see it again!)
 
-## 3. Environment Configuration
+**Note:** The Anthropic API key is now used by the Supabase Edge Functions, not directly by the client app.
+
+## 4. Environment Configuration
 
 1. In the project root, find the `.env` file
 2. Replace the placeholder values with your actual keys:
@@ -60,20 +102,19 @@ This guide will help you set up the expo-meal app with Supabase backend and Clau
 # Supabase Configuration
 EXPO_PUBLIC_SUPABASE_URL=https://your-project-id.supabase.co
 EXPO_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
-
-# Anthropic API Configuration
-EXPO_PUBLIC_ANTHROPIC_API_KEY=your-anthropic-api-key
 ```
 
-**Important**: Never commit the `.env` file to git. It's already in `.gitignore`.
+**Important**:
+- Never commit the `.env` file to git. It's already in `.gitignore`.
+- The Anthropic API key is no longer needed in the client `.env` file - it's configured as a secret in Supabase Edge Functions.
 
-## 4. Install Dependencies
+## 5. Install Dependencies
 
 ```bash
 npm install
 ```
 
-## 5. Run the App
+## 6. Run the App
 
 ### Start the development server:
 

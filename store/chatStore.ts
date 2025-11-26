@@ -1,135 +1,87 @@
 import { create } from 'zustand';
-import { supabase } from '@/lib/supabase';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-
-export interface ChatMessage {
-  id: string;
-  role: 'user' | 'assistant';
-  content: string;
-  timestamp: Date;
-  toolCalls?: Array<{
-    id: string;
-    name: string;
-    input: any;
-    result?: string;
-  }>;
-}
+import { ChatMessage } from '@/types/database.types';
+import { sendMessage as sendMessageApi, getMessages } from '@/lib/chatApi';
 
 interface ChatState {
   messages: ChatMessage[];
   loading: boolean;
   currentConversationId: string | null;
-  loadMessages: () => Promise<void>;
-  addMessage: (message: ChatMessage) => Promise<void>;
-  clearMessages: () => Promise<void>;
-  saveConversation: () => Promise<void>;
+  loadMessages: (conversationId?: string) => Promise<void>;
+  sendMessage: (message: string) => Promise<ChatMessage>;
+  clearMessages: () => void;
+  setConversationId: (id: string | null) => void;
 }
-
-const STORAGE_KEY = 'chat_messages';
-const CONVERSATION_ID_KEY = 'current_conversation_id';
 
 export const useChatStore = create<ChatState>((set, get) => ({
   messages: [],
   loading: false,
   currentConversationId: null,
 
-  loadMessages: async () => {
+  loadMessages: async (conversationId?: string) => {
+    const idToLoad = conversationId || get().currentConversationId;
+
+    if (!idToLoad) {
+      // No conversation to load
+      set({ messages: [] });
+      return;
+    }
+
     try {
       set({ loading: true });
+      const response = await getMessages(idToLoad);
 
-      // Try to load from AsyncStorage first (faster)
-      const stored = await AsyncStorage.getItem(STORAGE_KEY);
-      const conversationId = await AsyncStorage.getItem(CONVERSATION_ID_KEY);
+      // Convert timestamp strings to Date objects if needed
+      const messages = response.messages.map((msg) => ({
+        ...msg,
+        timestamp: msg.timestamp,
+      }));
 
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        // Convert timestamp strings back to Date objects
-        const messages = parsed.map((msg: any) => ({
-          ...msg,
-          timestamp: new Date(msg.timestamp),
-        }));
-        set({ messages, currentConversationId: conversationId });
-      }
+      set({
+        messages,
+        currentConversationId: response.conversationId
+      });
     } catch (error) {
       console.error('Error loading messages:', error);
+      // Don't throw - just set empty messages
+      set({ messages: [] });
     } finally {
       set({ loading: false });
     }
   },
 
-  addMessage: async (message: ChatMessage) => {
-    const { messages } = get();
-    const newMessages = [...messages, message];
+  sendMessage: async (message: string): Promise<ChatMessage> => {
+    const { currentConversationId, messages } = get();
 
-    set({ messages: newMessages });
-
-    // Save to AsyncStorage immediately
     try {
-      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(newMessages));
-    } catch (error) {
-      console.error('Error saving message:', error);
+      set({ loading: true });
+
+      // Call the Edge Function
+      const response = await sendMessageApi(message, currentConversationId || undefined);
+
+      // Add both user message and assistant response to state
+      // The response includes the assistant message, and the conversation includes both
+      // We need to reload the conversation to get the full message history
+      const updatedMessages = await getMessages(response.conversationId);
+
+      set({
+        messages: updatedMessages.messages,
+        currentConversationId: response.conversationId
+      });
+
+      return response.message;
+    } catch (error: any) {
+      console.error('Error sending message:', error);
+      throw error;
+    } finally {
+      set({ loading: false });
     }
   },
 
-  clearMessages: async () => {
+  clearMessages: () => {
     set({ messages: [], currentConversationId: null });
-    try {
-      await AsyncStorage.removeItem(STORAGE_KEY);
-      await AsyncStorage.removeItem(CONVERSATION_ID_KEY);
-    } catch (error) {
-      console.error('Error clearing messages:', error);
-    }
   },
 
-  saveConversation: async () => {
-    const { messages, currentConversationId } = get();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user || messages.length === 0) return;
-
-    try {
-      // Create or update conversation in Supabase
-      const conversationData = {
-        user_id: user.id,
-        title: messages[0]?.content.substring(0, 100) || 'New conversation',
-        messages: messages.map((msg) => ({
-          id: msg.id,
-          role: msg.role,
-          content: msg.content,
-          timestamp: msg.timestamp.toISOString(),
-          toolCalls: msg.toolCalls,
-        })),
-        updated_at: new Date().toISOString(),
-      };
-
-      if (currentConversationId) {
-        // Update existing conversation
-        const { error } = await supabase
-          .from('conversations')
-          .update(conversationData)
-          .eq('id', currentConversationId);
-
-        if (error) throw error;
-      } else {
-        // Create new conversation
-        const { data, error } = await supabase
-          .from('conversations')
-          .insert([conversationData])
-          .select()
-          .single();
-
-        if (error) throw error;
-
-        if (data) {
-          set({ currentConversationId: data.id });
-          await AsyncStorage.setItem(CONVERSATION_ID_KEY, data.id);
-        }
-      }
-    } catch (error) {
-      console.error('Error saving conversation to Supabase:', error);
-      // Don't throw - local storage is already saved
-    }
+  setConversationId: (id: string | null) => {
+    set({ currentConversationId: id });
   },
 }));

@@ -12,260 +12,58 @@ import {
   Keyboard,
   TouchableWithoutFeedback,
 } from 'react-native';
-import { useAuthStore } from '@/store/authStore';
-import { useRecipeStore } from '@/store/recipeStore';
-import { useMealPlanStore } from '@/store/mealPlanStore';
-import { usePantryStore } from '@/store/pantryStore';
-import { useGroceryStore } from '@/store/groceryStore';
 import { useChatStore } from '@/store/chatStore';
-import { Message, buildContextPrompt, sendMessage, ToolCall } from '@/lib/claude';
-import { supabase } from '@/lib/supabase';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 
 export default function ChatScreen() {
-  const { profile, user, fetchProfile } = useAuthStore();
-  const { recipes } = useRecipeStore();
-  const { mealPlans, addMealPlan, fetchMealPlans } = useMealPlanStore();
-  const { pantryItems, addPantryItem, fetchPantryItems } = usePantryStore();
-  const {
-    groceryLists,
-    groceryListItems,
-    createGroceryList,
-    addItemToList,
-    fetchGroceryLists,
-    fetchGroceryListItems,
-  } = useGroceryStore();
   const {
     messages: storedMessages,
+    loading,
     loadMessages,
-    addMessage,
+    sendMessage,
     clearMessages,
-    saveConversation,
   } = useChatStore();
 
   const [inputText, setInputText] = useState('');
-  const [loading, setLoading] = useState(false);
   const scrollViewRef = useRef<ScrollView>(null);
 
-  // Use stored messages or default welcome message
-  const messages =
-    storedMessages.length > 0
-      ? storedMessages
-      : [
-          {
-            id: '1',
-            role: 'assistant' as const,
-            content:
-              "Hi! I'm Claude, your cooking and meal planning assistant. I can help you with recipe suggestions, cooking tips, meal planning, and more. I can also help you add meals to your plan, manage your pantry and grocery list, and update your allergy information. What would you like to do?",
-            timestamp: new Date(),
-          },
-        ];
+  // Default welcome message
+  const welcomeMessage = {
+    id: '1',
+    role: 'assistant' as const,
+    content:
+      "Hi! I'm Claude, your cooking and meal planning assistant. I can help you with recipe suggestions, cooking tips, meal planning, and more. I can also help you add meals to your plan, manage your pantry and grocery list, and update your allergy information. What would you like to do?",
+    timestamp: new Date().toISOString(),
+  };
 
-  // Load chat messages and grocery lists on mount
+  // Use stored messages or show welcome message
+  const messages = storedMessages.length > 0 ? storedMessages : [welcomeMessage];
+
+  // Load chat messages on mount
   useEffect(() => {
-    const loadData = async () => {
-      await Promise.all([loadMessages(), fetchGroceryLists()]);
-    };
-    loadData();
+    loadMessages();
   }, []);
-
-  // Load items when grocery lists change
-  useEffect(() => {
-    groceryLists.forEach((list) => {
-      if (!groceryListItems[list.id]) {
-        fetchGroceryListItems(list.id);
-      }
-    });
-  }, [groceryLists]);
-
-  // Get all grocery items from active lists
-  const allGroceryItems = Object.values(groceryListItems).flat();
-
-  const contextPrompt = buildContextPrompt(
-    profile,
-    recipes,
-    pantryItems,
-    mealPlans,
-    allGroceryItems
-  );
 
   useEffect(() => {
     scrollViewRef.current?.scrollToEnd({ animated: true });
   }, [messages]);
 
-  // Execute tool calls
-  const executeTool = async (toolCall: ToolCall): Promise<string> => {
-    try {
-      switch (toolCall.name) {
-        case 'add_meal_plan': {
-          const { date, meal_type, meal_name, recipe_id } = toolCall.input;
-          await addMealPlan({
-            date,
-            meal_type,
-            meal_name,
-            recipe_id: recipe_id || null,
-          });
-          // Refresh meal plans
-          const startDate = new Date();
-          startDate.setDate(startDate.getDate() - 7);
-          const endDate = new Date();
-          endDate.setDate(endDate.getDate() + 14);
-          await fetchMealPlans(startDate, endDate);
-          return `Successfully added ${meal_name} to ${meal_type} on ${date}`;
-        }
-
-        case 'add_pantry_item': {
-          const { name, quantity, unit, category, expiry_date } = toolCall.input;
-          await addPantryItem({
-            name,
-            quantity,
-            unit,
-            category: category || null,
-            expiry_date: expiry_date || null,
-          });
-          // Refresh pantry items
-          await fetchPantryItems();
-          return `Successfully added ${quantity} ${unit} of ${name} to pantry`;
-        }
-
-        case 'add_grocery_item': {
-          const { name, quantity, unit, category } = toolCall.input;
-
-          // Default values if not provided
-          const finalQuantity = quantity || 1;
-          const finalUnit = unit || 'item';
-
-          // Get or create an active grocery list
-          let activeList = groceryLists[0]; // Use the most recent list
-          if (!activeList) {
-            // Create a new list if none exists
-            const today = new Date().toLocaleDateString('en-US', {
-              month: 'short',
-              day: 'numeric',
-            });
-            activeList = await createGroceryList(`Grocery List - ${today}`);
-          }
-
-          // Add item to the list
-          await addItemToList(activeList.id, {
-            name,
-            quantity: finalQuantity,
-            unit: finalUnit,
-            category: category || null,
-            is_checked: false,
-            recipe_id: null,
-          });
-
-          // Refresh grocery list items
-          await fetchGroceryListItems(activeList.id);
-
-          return `Successfully added ${finalQuantity} ${finalUnit}${finalQuantity !== 1 ? 's' : ''} of ${name} to grocery list`;
-        }
-
-        case 'update_allergies': {
-          if (!user) throw new Error('Not authenticated');
-          const { allergies, action } = toolCall.input;
-
-          let updatedAllergies = [...(profile?.allergies || [])];
-
-          if (action === 'replace') {
-            updatedAllergies = allergies;
-          } else if (action === 'add') {
-            updatedAllergies = [...updatedAllergies, ...allergies].filter(
-              (v, i, a) => a.indexOf(v) === i
-            ); // Remove duplicates
-          } else if (action === 'remove') {
-            updatedAllergies = updatedAllergies.filter(
-              (a) => !allergies.includes(a)
-            );
-          }
-
-          const { error } = await supabase
-            .from('profiles')
-            .update({ allergies: updatedAllergies })
-            .eq('id', user.id);
-
-          if (error) throw error;
-
-          await fetchProfile();
-          return `Successfully updated allergies. Current allergies: ${updatedAllergies.join(', ') || 'None'}`;
-        }
-
-        default:
-          return `Unknown tool: ${toolCall.name}`;
-      }
-    } catch (error: any) {
-      console.error('Error executing tool:', error);
-      return `Error executing ${toolCall.name}: ${error.message}`;
-    }
-  };
-
   const handleSend = async () => {
     if (!inputText.trim() || loading) return;
 
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      role: 'user',
-      content: inputText.trim(),
-      timestamp: new Date(),
-    };
-
-    await addMessage(userMessage);
+    const messageText = inputText.trim();
     setInputText('');
     Keyboard.dismiss();
-    setLoading(true);
 
     try {
-      const conversationHistory = [...messages, userMessage];
-      const response = await sendMessage(conversationHistory, contextPrompt);
-
-      // Execute any tool calls
-      let finalContent = response.text;
-      const executedTools: ToolCall[] = [];
-
-      if (response.toolCalls && response.toolCalls.length > 0) {
-        const toolResults: string[] = [];
-
-        for (const toolCall of response.toolCalls) {
-          const result = await executeTool(toolCall);
-          toolResults.push(result);
-          executedTools.push({
-            ...toolCall,
-            result,
-          });
-        }
-
-        // Append tool execution results to the message
-        if (toolResults.length > 0) {
-          finalContent =
-            (finalContent ? finalContent + '\n\n' : '') +
-            '✅ Actions completed:\n' +
-            toolResults.map((r) => `• ${r}`).join('\n');
-        }
-      }
-
-      const assistantMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: finalContent || 'Done!',
-        timestamp: new Date(),
-        toolCalls: executedTools.length > 0 ? executedTools : undefined,
-      };
-
-      await addMessage(assistantMessage);
-
-      // Save conversation to Supabase (non-blocking)
-      saveConversation().catch((err) =>
-        console.error('Failed to save conversation:', err)
-      );
+      await sendMessage(messageText);
+      // Messages are automatically updated by the store
     } catch (error: any) {
       console.error('Error sending message:', error);
       Alert.alert(
         'Error',
         error.message || 'Failed to get response from Claude'
       );
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -295,6 +93,14 @@ export default function ChatScreen() {
         },
       ]
     );
+  };
+
+  const formatTimestamp = (timestamp: string) => {
+    const date = new Date(timestamp);
+    return date.toLocaleTimeString(undefined, {
+      hour: '2-digit',
+      minute: '2-digit',
+    });
   };
 
   return (
@@ -373,10 +179,7 @@ export default function ChatScreen() {
               </Text>
             </View>
             <Text className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">
-              {message.timestamp.toLocaleTimeString(undefined, {
-                hour: '2-digit',
-                minute: '2-digit',
-              })}
+              {formatTimestamp(message.timestamp)}
             </Text>
           </View>
         ))}
