@@ -7,6 +7,7 @@ This directory contains the Supabase Edge Functions for the Expo Meal app. These
 ### process-chat
 
 Processes chat messages by:
+
 1. Loading conversation history from the database
 2. Building user context (profile, recipes, pantry items, etc.)
 3. Calling the Claude API
@@ -16,6 +17,7 @@ Processes chat messages by:
 **Endpoint:** `POST /process-chat`
 
 **Request Body:**
+
 ```json
 {
   "message": "What can I make with chicken?",
@@ -24,6 +26,7 @@ Processes chat messages by:
 ```
 
 **Response:**
+
 ```json
 {
   "message": {
@@ -44,6 +47,7 @@ Retrieves messages for a conversation.
 **Endpoint:** `POST /get-messages`
 
 **Request Body:**
+
 ```json
 {
   "conversationId": "conversation-id"
@@ -51,6 +55,7 @@ Retrieves messages for a conversation.
 ```
 
 **Response:**
+
 ```json
 {
   "messages": [
@@ -70,16 +75,19 @@ Retrieves messages for a conversation.
 ### Prerequisites
 
 1. Install the Supabase CLI:
+
 ```bash
 npm install -g supabase
 ```
 
 2. Login to Supabase:
+
 ```bash
 supabase login
 ```
 
 3. Link your project:
+
 ```bash
 supabase link --project-ref your-project-ref
 ```
@@ -87,11 +95,13 @@ supabase link --project-ref your-project-ref
 ### Deploy Functions
 
 Deploy all functions:
+
 ```bash
 supabase functions deploy
 ```
 
 Deploy a specific function:
+
 ```bash
 supabase functions deploy process-chat
 ```
@@ -105,6 +115,7 @@ supabase secrets set ANTHROPIC_API_KEY=your-anthropic-api-key
 ```
 
 You can verify secrets are set:
+
 ```bash
 supabase secrets list
 ```
@@ -112,16 +123,19 @@ supabase secrets list
 ## Local Development
 
 ### Start Supabase locally:
+
 ```bash
 supabase start
 ```
 
 ### Serve functions locally:
+
 ```bash
 supabase functions serve
 ```
 
 ### Test a function locally:
+
 ```bash
 curl -i --location --request POST 'http://localhost:54321/functions/v1/process-chat' \
   --header 'Authorization: Bearer YOUR_ANON_KEY' \

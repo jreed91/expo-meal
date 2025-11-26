@@ -78,6 +78,7 @@ supabase functions deploy
 ```
 
 This will deploy:
+
 - `process-chat` - Handles chat message processing and Claude AI integration
 - `get-messages` - Retrieves conversation history
 
@@ -105,6 +106,7 @@ EXPO_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
 ```
 
 **Important**:
+
 - Never commit the `.env` file to git. It's already in `.gitignore`.
 - The Anthropic API key is no longer needed in the client `.env` file - it's configured as a secret in Supabase Edge Functions.
 
@@ -162,15 +164,18 @@ All tables have Row Level Security (RLS) enabled to ensure users can only access
 ## Troubleshooting
 
 ### Can't connect to Supabase
+
 - Verify your `EXPO_PUBLIC_SUPABASE_URL` and `EXPO_PUBLIC_SUPABASE_ANON_KEY` are correct
 - Make sure the URL starts with `https://`
 - Check that your Supabase project is active
 
 ### Authentication not working
+
 - Ensure the `handle_new_user()` trigger is set up correctly in SQL
 - Check the Supabase Auth logs in the dashboard
 
 ### Database queries failing
+
 - Verify RLS policies are enabled
 - Check that you're logged in with a valid user
 - Review the Supabase logs for detailed error messages

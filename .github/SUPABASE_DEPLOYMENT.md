@@ -5,6 +5,7 @@ This repository includes automated deployment of Supabase Edge Functions via Git
 ## Automated Deployment
 
 The workflow deploys Edge Functions automatically when:
+
 - Changes are pushed to the `main` branch in the `supabase/functions/` directory
 - Manually triggered via GitHub Actions UI
 
@@ -15,6 +16,7 @@ To enable automated deployment, you need to configure the following secrets in y
 ### 1. SUPABASE_ACCESS_TOKEN
 
 **How to get it:**
+
 1. Go to [Supabase Dashboard](https://supabase.com/dashboard)
 2. Click on your profile icon (top right)
 3. Go to "Account Settings"
@@ -24,6 +26,7 @@ To enable automated deployment, you need to configure the following secrets in y
 7. Copy the token (you won't be able to see it again!)
 
 **How to add it to GitHub:**
+
 1. Go to your repository on GitHub
 2. Navigate to Settings → Secrets and variables → Actions
 3. Click "New repository secret"
@@ -34,6 +37,7 @@ To enable automated deployment, you need to configure the following secrets in y
 ### 2. SUPABASE_PROJECT_ID
 
 **How to get it:**
+
 1. Go to [Supabase Dashboard](https://supabase.com/dashboard)
 2. Select your project
 3. Go to Settings → General
@@ -41,6 +45,7 @@ To enable automated deployment, you need to configure the following secrets in y
 5. Copy the ID (format: `abcdefghijklmnopqrst`)
 
 **How to add it to GitHub:**
+
 1. Go to your repository on GitHub
 2. Navigate to Settings → Secrets and variables → Actions
 3. Click "New repository secret"
@@ -53,6 +58,7 @@ To enable automated deployment, you need to configure the following secrets in y
 This secret is used by the chat functionality to interact with Claude AI.
 
 **How to get it:**
+
 1. Go to [Anthropic Console](https://console.anthropic.com)
 2. Sign up or log in
 3. Navigate to "API Keys"
@@ -60,6 +66,7 @@ This secret is used by the chat functionality to interact with Claude AI.
 5. Copy the key (you won't be able to see it again!)
 
 **How to add it to GitHub:**
+
 1. Go to your repository on GitHub
 2. Navigate to Settings → Secrets and variables → Actions
 3. Click "New repository secret"
@@ -111,19 +118,23 @@ curl -i --location --request POST 'http://localhost:54321/functions/v1/pantry' \
 ## Troubleshooting
 
 ### Deployment fails with "Unauthorized"
+
 - Check that `SUPABASE_ACCESS_TOKEN` is correctly set in GitHub secrets
 - Verify the token hasn't expired (tokens can be regenerated)
 
 ### Deployment fails with "Project not found"
+
 - Verify `SUPABASE_PROJECT_ID` matches your actual project ID
 - Check the format (should be alphanumeric, no spaces)
 
 ### Functions deployed but not working
+
 - Check Supabase Logs in the dashboard (Logs → Edge Functions)
 - Verify `ANTHROPIC_API_KEY` is set in Supabase secrets
 - Ensure RLS policies are correctly configured
 
 ### How to view deployment logs
+
 1. Go to GitHub repository
 2. Click on "Actions" tab
 3. Select the deployment workflow run
